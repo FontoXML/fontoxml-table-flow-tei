@@ -1,17 +1,11 @@
 define([
 	'fontoxml-table-flow/TableDefinition',
-	'fontoxml-table-flow/Width',
-
-	'fontoxml-table-flow/setAttributeStrategies',
-
-	'fontoxml-table-flow/createCreateRowStrategy'
+	'fontoxml-table-flow/createCreateRowStrategy',
+	'fontoxml-table-flow/setAttributeStrategies'
 ], function (
 	TableDefinition,
-	Width,
-
-	setAttributeStrategies,
-
-	createCreateRowStrategy
+	createCreateRowStrategy,
+	setAttributeStrategies
 ) {
 	'use strict';
 
@@ -87,22 +81,6 @@ define([
 				'(let $cells := (.//' + row + ')[1]/' + cell + ' return for $node in $cells return let $cols := $node/@cols => number() return if ($cols) then $cols else 1) => sum()',
 			getRowSpanForCellNodeXPathQuery: 'let $rows := ./@rows => number() return if ($rows) then $rows else 1',
 			getColumnSpanForCellNodeXPathQuery: 'let $cols := ./@cols => number() return if ($cols) then $cols else 1',
-
-			// Default values
-			getDefaultColumnSpecificationStrategy: function (context) {
-					return {
-						columnName: 'column-' + context.columnIndex,
-						columnNumber: context.columnIndex,
-						columnWidth: new Width('1*')
-					};
-				},
-			getDefaultCellSpecificationStrategy: function (context) {
-					return {
-						rows: '1',
-						cols: '1',
-						width: new Width('1*')
-					};
-				},
 
 			// Creates
 			createRowStrategy: createCreateRowStrategy(namespaceURI, 'row'),
