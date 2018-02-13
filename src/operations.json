@@ -1,0 +1,47 @@
+{
+	"tei-table-insert": {
+		"__documentation": {
+			"summary": "Insert an TEI table",
+			"category": "add-on/fontoxml-table-flow-tei",
+			"fontosdk": true,
+			"params": [
+				{
+					"name": "[rows=1]",
+					"type": "number",
+					"description": "The number of rows to create for the new table"
+				},
+				{
+					"name": "[columns=1]",
+					"type": "number",
+					"description": "The number of columns to create for the new table"
+				}
+			]
+		},
+		"label": "t__Table",
+		"description": "t__Insert a table.",
+		"icon": "table",
+		"initialData": {
+			"childNodeStructure": [
+				"table"
+			],
+			"rows": 1,
+			"columns": 1
+		},
+		"getStateSteps": [
+			{
+				"type": "command/table-insert"
+			}
+		],
+		"steps": [
+			{
+				"type": "command/table-insert"
+			},
+			{
+				"type": "operation/set-cursor-to-first-text-position",
+				"data": {
+					"contextNodeId": "{{tableNodeId}}"
+				}
+			}
+		]
+	}
+}
