@@ -105,7 +105,7 @@ define([
 				},
 
 			// Creates
-			createRowStrategy: createCreateRowStrategy(this.namespaceURI, 'row'),
+			createRowStrategy: createCreateRowStrategy(namespaceURI, 'row'),
 
 			// Set attributes
 			setTableNodeAttributeStrategies: [
