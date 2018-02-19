@@ -28,7 +28,7 @@ configureAsTeiTableElements(sxModule, {
 		// An attribute to set when a given row is not a header row (optional)
 		normalAttribute: {
 			name: 'role',
-			value: 'label'
+			value: 'data'
 		}
 	}
 
@@ -41,7 +41,7 @@ configureAsTeiTableElements(sxModule, {
 		// An attribute to set when a given cell is not a header cell (optional)
 		normalAttribute: {
 			name: 'role',
-			value: 'label'
+			value: 'data'
 		}
 	}
 });
