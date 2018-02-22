@@ -53,19 +53,12 @@ define([
 		};
 
 		// Alias selector parts
-		var table = selectorParts.table;
 		var row = selectorParts.row;
 		var cell = selectorParts.cell;
 
 		// Properties object
 		var properties = {
 			selectorParts: selectorParts,
-
-			tableDefiningNodeSelector: 'self::' + table,
-			cellDefiningNodeSelector: 'self::' + cell,
-			tablePartsNodeSelector: Object.keys(selectorParts).map(function (key) {
-					return 'self::' + selectorParts[key];
-				}.bind(this)).join(' or '),
 
 			// Finds
 			findHeaderRowNodesXPathQuery: './' + row + '[descendant::' + cell + '[@role="label"]]',
