@@ -1,9 +1,11 @@
 define([
 	'fontoxml-table-flow/TableDefinition',
+	'fontoxml-table-flow/createCreateCellNodeStrategy',
 	'fontoxml-table-flow/createCreateRowStrategy',
 	'fontoxml-table-flow/setAttributeStrategies'
 ], function (
 	TableDefinition,
+	createCreateCellNodeStrategy,
 	createCreateRowStrategy,
 	setAttributeStrategies
 ) {
@@ -58,8 +60,6 @@ define([
 		// Properties object
 		var properties = {
 			selectorParts: selectorParts,
-			namespaceURI: namespaceURI,
-			cellLocalName: 'cell',
 
 			tableDefiningNodeSelector: 'self::' + table,
 			cellDefiningNodeSelector: 'self::' + cell,
@@ -83,6 +83,7 @@ define([
 			getColumnSpanForCellNodeXPathQuery: 'let $cols := ./@cols => number() return if ($cols) then $cols else 1',
 
 			// Creates
+			createCellNodeStrategy: createCreateCellNodeStrategy(namespaceURI, 'cell'),
 			createRowStrategy: createCreateRowStrategy(namespaceURI, 'row'),
 
 			// Set attributes
