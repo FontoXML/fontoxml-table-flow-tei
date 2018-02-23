@@ -57,7 +57,6 @@ describe('TEI: XML to XML roundtrip', () => {
 		chai.assert.isTrue(success);
 
 		blueprint.realize();
-		console.log(jsonMLMapper.serialize(documentNode.firstChild));
 		chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), jsonOut);
 	}
 

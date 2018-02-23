@@ -52,6 +52,24 @@ define([
 			cell: namespaceSelector + 'cell'
 		};
 
+		var headerRowFilter = '';
+		var bodyRowFilter = '';
+
+		if (shouldSetAttributeForHeaderRows) {
+			headerRowFilter += '[@' + headerRowAttributeName + '="' + headerRowAttributeValue + '"';
+			bodyRowFilter += '[(@' + headerRowAttributeName + '="' + headerRowAttributeValue + '") => not()';
+		}
+
+		if (shouldSetAttributeForHeaderCells) {
+			headerRowFilter += (headerRowFilter !== '' ? ' or ' : '[') + 'child::' + selectorParts.cell + '/@' + headerCellAttributeName + '="' + headerCellAttributeValue + '"';
+			bodyRowFilter += (bodyRowFilter !== '' ? ' or ' : '[') + '(child::' + selectorParts.cell + '/@' + headerCellAttributeName + '="' + headerCellAttributeValue + '") => not()';
+		}
+
+		if (shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells) {
+			headerRowFilter += ']';
+			bodyRowFilter += ']';
+		}
+
 		// Alias selector parts
 		var row = selectorParts.row;
 		var cell = selectorParts.cell;
@@ -61,8 +79,8 @@ define([
 			selectorParts: selectorParts,
 
 			// Finds
-			findHeaderRowNodesXPathQuery: './' + row + '[descendant::' + cell + '[@role="label"]]',
-			findBodyRowNodesXPathQuery: './' + row + '[descendant::' + cell + '[(@role="label") => not()]]',
+			findHeaderRowNodesXPathQuery: shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells ? './' + row + headerRowFilter : '()',
+			findBodyRowNodesXPathQuery: './' + row + bodyRowFilter,
 
 			findCellNodesXPathQuery: './' + cell,
 

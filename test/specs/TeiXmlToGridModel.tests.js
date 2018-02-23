@@ -19,7 +19,14 @@ describe('TEI: XML to GridModel', () => {
 		coreDocument = new CoreDocument(documentNode);
 
 		blueprint = new Blueprint(coreDocument.dom);
-		tableDefinition = new TeiTableDefinition({});
+		tableDefinition = new TeiTableDefinition({
+			cell: {
+				headerAttribute: {
+					name: 'role',
+					value: 'label'
+				}
+			}
+		});
 	});
 
 	describe('Basics', () => {
