@@ -31,14 +31,19 @@ describe('TEI: XML to GridModel', () => {
 
 	describe('Basics', () => {
 		it('can deserialize a 1x1 table', () => {
-			coreDocument.dom.mutate(() => jsonMLMapper.parse(
-				['table',
-					{
-						'cols': '1',
-						'rows': '1'
-					},
-					['row', ['cell']]
-				], documentNode));
+			coreDocument.dom.mutate(() =>
+				jsonMLMapper.parse(
+					[
+						'table',
+						{
+							cols: '1',
+							rows: '1'
+						},
+						['row', ['cell']]
+					],
+					documentNode
+				)
+			);
 
 			const tableElement = documentNode.firstChild;
 			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -50,17 +55,22 @@ describe('TEI: XML to GridModel', () => {
 		});
 
 		it('can deserialize a 4x4 table', () => {
-			coreDocument.dom.mutate(() => jsonMLMapper.parse(
-				['table',
-					{
-						'cols': '4',
-						'rows': '4'
-					},
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-				], documentNode));
+			coreDocument.dom.mutate(() =>
+				jsonMLMapper.parse(
+					[
+						'table',
+						{
+							cols: '4',
+							rows: '4'
+						},
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+					],
+					documentNode
+				)
+			);
 
 			const tableElement = documentNode.firstChild;
 			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -72,17 +82,29 @@ describe('TEI: XML to GridModel', () => {
 		});
 
 		it('can deserialize a 4x4 table containing processing instructions and comments', () => {
-			coreDocument.dom.mutate(() => jsonMLMapper.parse(
-				['table',
-					{
-						'cols': '4',
-						'rows': '4'
-					},
-					['row', ['cell'], ['?someProcessingInstruction', 'someContent'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['!', 'some comment'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-				], documentNode));
+			coreDocument.dom.mutate(() =>
+				jsonMLMapper.parse(
+					[
+						'table',
+						{
+							cols: '4',
+							rows: '4'
+						},
+						[
+							'row',
+							['cell'],
+							['?someProcessingInstruction', 'someContent'],
+							['cell'],
+							['cell'],
+							['cell']
+						],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['!', 'some comment'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+					],
+					documentNode
+				)
+			);
 
 			const tableElement = documentNode.firstChild;
 			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -96,17 +118,28 @@ describe('TEI: XML to GridModel', () => {
 
 	describe('Headers and footers', () => {
 		it('can deserialize a 4x4 table with 1 header row', () => {
-			coreDocument.dom.mutate(() => jsonMLMapper.parse(
-				['table',
-					{
-						'cols': '4',
-						'rows': '4'
-					},
-					['row', ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-				], documentNode));
+			coreDocument.dom.mutate(() =>
+				jsonMLMapper.parse(
+					[
+						'table',
+						{
+							cols: '4',
+							rows: '4'
+						},
+						[
+							'row',
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }]
+						],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+					],
+					documentNode
+				)
+			);
 
 			const tableElement = documentNode.firstChild;
 			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -118,17 +151,34 @@ describe('TEI: XML to GridModel', () => {
 		});
 
 		it('can deserialize a 4x4 table with 2 header rows', () => {
-			coreDocument.dom.mutate(() => jsonMLMapper.parse(
-				['table',
-					{
-						'cols': '4',
-						'rows': '4'
-					},
-					['row', ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }] ],
-					['row', ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-					['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-				], documentNode));
+			coreDocument.dom.mutate(() =>
+				jsonMLMapper.parse(
+					[
+						'table',
+						{
+							cols: '4',
+							rows: '4'
+						},
+						[
+							'row',
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }]
+						],
+						[
+							'row',
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }],
+							['cell', { role: 'label' }]
+						],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+					],
+					documentNode
+				)
+			);
 
 			const tableElement = documentNode.firstChild;
 			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -143,17 +193,22 @@ describe('TEI: XML to GridModel', () => {
 	describe('Spanning cells', () => {
 		describe('Column spanning cells', () => {
 			it('can deserialize a 4x4 table with a column spanning cell on the first row', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'cols': '2' }], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							['row', ['cell', { cols: '2' }], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
 				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -165,17 +220,27 @@ describe('TEI: XML to GridModel', () => {
 			});
 
 			it('can deserialize a 4x4 table with a column spanning cell on the first header row', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'role': 'label', 'cols': '2' }], ['cell', { 'role': 'label' }], ['cell', { 'role': 'label' }] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							[
+								'row',
+								['cell', { role: 'label', cols: '2' }],
+								['cell', { role: 'label' }],
+								['cell', { role: 'label' }]
+							],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
 				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -187,36 +252,50 @@ describe('TEI: XML to GridModel', () => {
 			});
 
 			it('throws when building a gridModel from a table containing incorrect colspans', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'cols': '2' }], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							['row', ['cell', { cols: '2' }], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
-				chai.assert.throws(tableDefinition.buildTableGridModel.bind(undefined, tableElement, blueprint));
+
+				chai.assert.property(
+					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					'error'
+				);
 			});
 		});
 
 		describe('Row spanning cells', () => {
 			it('can deserialize a 4x4 table with a row spanning cell on the first row', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'rows': '2' }], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							['row', ['cell', { rows: '2' }], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
 				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -228,36 +307,50 @@ describe('TEI: XML to GridModel', () => {
 			});
 
 			it('throws when building a gridModel from a table containing incorrect rowspans', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'rows': '2' }], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							['row', ['cell', { rows: '2' }], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
-				chai.assert.throws(tableDefinition.buildTableGridModel.bind(undefined, tableElement, blueprint));
+
+				chai.assert.property(
+					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					'error'
+				);
 			});
 		});
 
 		describe('Row and column spanning cells', () => {
 			it('can deserialize a 4x4 table with a column and row spanning cell on the first row', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'cols': '2', 'rows': '2' }], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							['row', ['cell', { cols: '2', rows: '2' }], ['cell'], ['cell']],
+							['row', ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
 				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
@@ -269,20 +362,35 @@ describe('TEI: XML to GridModel', () => {
 			});
 
 			it('throws when building a gridModel from a table containing incorrect rowspans and colspans', () => {
-				coreDocument.dom.mutate(() => jsonMLMapper.parse(
-					['table',
-						{
-							'cols': '4',
-							'rows': '4'
-						},
-						['row', ['cell', { 'cols': '2', 'rows': '2' }], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ],
-						['row', ['cell'], ['cell'], ['cell'], ['cell'] ]
-					], documentNode));
+				coreDocument.dom.mutate(() =>
+					jsonMLMapper.parse(
+						[
+							'table',
+							{
+								cols: '4',
+								rows: '4'
+							},
+							[
+								'row',
+								['cell', { cols: '2', rows: '2' }],
+								['cell'],
+								['cell'],
+								['cell']
+							],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
+							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						],
+						documentNode
+					)
+				);
 
 				const tableElement = documentNode.firstChild;
-				chai.assert.throws(tableDefinition.buildTableGridModel.bind(undefined, tableElement, blueprint));
+
+				chai.assert.property(
+					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					'error'
+				);
 			});
 		});
 	});
