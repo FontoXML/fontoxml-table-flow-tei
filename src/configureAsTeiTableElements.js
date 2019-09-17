@@ -7,23 +7,30 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  * Example usage for the table widgets:
  *
  *```
- * 	configureAsTeiTableElements(sxModule, {
- * 		table: {
- *			localName: 'table'
+ *	configureAsTeiTableElements(sxModule, {
+ *		table: {
+ *			namespaceURI: 'http://www.tei-c.org/ns/1.0'
  *		},
- *		entry: {
+ *		cell: {
  *			defaultTextContainer: 'p'
  *		},
- *		columnBefore: [createIconWidget('clock-o', {
- *			clickOperation: 'lcTime-value-edit',
- *			tooltipContent: 'Click here to edit the duration'
- *		})],
+ *		row: {
+ *			headerAttribute: {
+ *				name: 'role',
+ *				value: 'label'
+ *			}
+ *		},
+ *		columnBefore: [
+ *			createIconWidget('clock-o', {
+ *				clickOperation: 'lcTime-value-edit',
+ *				tooltipContent: 'Click here to edit the duration'
+ *			})
+ *		],
  *		rowBefore: [
- *				createIconWidget('dot-circle-o', {
- *					clickOperation: 'do-nothing'
- *					clickOperation: 'do-nothing'
- *				})
- *			],
+ *			createIconWidget('dot-circle-o', {
+ *				clickOperation: 'do-nothing'
+ *			})
+ *		],
  *		showInsertionWidget: true,
  *		showHighlightingWidget: true
  *	});
