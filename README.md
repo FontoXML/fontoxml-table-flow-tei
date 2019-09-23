@@ -45,14 +45,7 @@ configureAsTeiTableElements(sxModule, {
 		}
 	},
 
-	// Use createIconWidget to add column icons before rows or columns. Any widget can be added but only icon widget is supported.
-	columnBefore: [
-		createIconWidget('clock-o', {
-			clickOperation: 'lcTime-value-edit',
-			tooltipContent: 'Click here to edit the duration'
-		})
-	],
-
+	// Use createIconWidget to add column icons before rows. Any widget can be added but only icon widget is supported.
 	rowBefore: [
 		createIconWidget('dot-circle-o', {
 			clickOperation: 'do-nothing'

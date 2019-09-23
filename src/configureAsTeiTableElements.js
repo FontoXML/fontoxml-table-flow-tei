@@ -4,6 +4,9 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
 /**
  * Configure TEI tables.
  *
+ * As TEI tables do not use elements to define columns, the columnBefore widget area is not
+ * supported.
+ *
  * Example usage for the table widgets:
  *
  *```
@@ -20,12 +23,6 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  *				value: 'label'
  *			}
  *		},
- *		columnBefore: [
- *			createIconWidget('clock-o', {
- *				clickOperation: 'lcTime-value-edit',
- *				tooltipContent: 'Click here to edit the duration'
- *			})
- *		],
  *		rowBefore: [
  *			createIconWidget('dot-circle-o', {
  *				clickOperation: 'do-nothing'
@@ -42,11 +39,10 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  *
  * @param  {Object}          sxModule
  * @param  {Object}          [options]
- * @param  {number}          [options.priority]                    Selector priorty for all elements configured by this function
+ * @param  {number}          [options.priority]                    Selector priority for all elements configured by this function
  * @param  {boolean}         [options.showInsertionWidget]         To add insertion buttons which insert a column or a row to a specific place, default false.
  * @param  {boolean}         [options.showHighlightingWidget]      To add highlighting bars which highlight columns and rows, and provide operations popover, default false.
- * @param  {Widget[]|null}   [options.columnBefore]                To add column icon widgets by using {@link createIconWidget}. Any widget can be added but only icon widget is supported.
- * @param  {Widget[]|null}   [options.rowBefore]                   To add row icon widgets by using {@link createIconWidget}. Any widget can be added but only icon widget is supported.
+ * @param  {Widget[]|null}   [options.rowBefore]                   To add row icon widgets by using {@link createIconWidget}. Row widgets are linked to the row elements of the table. Any widget can be added but only icon widget is supported.
  * @param  {Object}          [options.table]                       Options for the table element
  * @param  {string}          [options.table.namespaceURI='']       The namespace URI for this table
  * @param  {Object}          [options.row]                         Configuration options for the row element
