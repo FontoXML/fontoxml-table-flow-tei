@@ -1,6 +1,7 @@
 import Blueprint from 'fontoxml-blueprints/Blueprint';
 import CoreDocument from 'fontoxml-core/Document';
 import jsonMLMapper from 'fontoxml-dom-utils/jsonMLMapper';
+import indicesManager from 'fontoxml-indices/indicesManager';
 import * as slimdom from 'slimdom';
 
 import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTableDefinition';
@@ -55,6 +56,7 @@ describe('TEI: Grid model to XML', () => {
 			);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
@@ -72,6 +74,7 @@ describe('TEI: Grid model to XML', () => {
 			);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
@@ -94,6 +97,7 @@ describe('TEI: Grid model to XML', () => {
 			);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
@@ -128,6 +132,7 @@ describe('TEI: Grid model to XML', () => {
 			);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
@@ -158,6 +163,7 @@ describe('TEI: Grid model to XML', () => {
 			chai.assert.isTrue(success);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
@@ -192,6 +198,7 @@ describe('TEI: Grid model to XML', () => {
 			chai.assert.isTrue(success);
 
 			blueprint.realize();
+			indicesManager.getIndexSet().commitMerge();
 			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
 				'table',
 				{
