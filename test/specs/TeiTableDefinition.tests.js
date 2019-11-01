@@ -4,10 +4,19 @@ import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTabl
 
 describe('TeiTableDefinition', () => {
 	let documentNode;
+	let tableNode;
+	let rowNode;
+	let cellNode;
 	let tableDefinition;
 
 	beforeEach(() => {
 		documentNode = new slimdom.Document();
+		tableNode = documentNode.createElement('table');
+		documentNode.appendChild(tableNode);
+		rowNode = documentNode.createElement('row');
+		tableNode.appendChild(rowNode);
+		cellNode = documentNode.createElement('cell');
+		rowNode.appendChild(cellNode);
 		tableDefinition = new TeiTableDefinition({});
 	});
 
@@ -16,17 +25,17 @@ describe('TeiTableDefinition', () => {
 	});
 
 	describe('isTable()', () => {
-		it('can recognize a table element',
-			() => chai.assert.isTrue(tableDefinition.isTable(documentNode.createElement('table'), readOnlyBlueprint)));
+		it('can recognize a table element', () =>
+			chai.assert.isTrue(tableDefinition.isTable(tableNode, readOnlyBlueprint)));
 	});
 
 	describe('isTableCell()', () => {
-		it('can recognize a cell element',
-			() => chai.assert.isTrue(tableDefinition.isTableCell(documentNode.createElement('cell'), readOnlyBlueprint)));
+		it('can recognize a cell element', () =>
+			chai.assert.isTrue(tableDefinition.isTableCell(cellNode, readOnlyBlueprint)));
 	});
 
 	describe('isTablePart()', () => {
-		it('can recognize a table part',
-			() => chai.assert.isTrue(tableDefinition.isTablePart(documentNode.createElement('row'), readOnlyBlueprint)));
+		it('can recognize a table part', () =>
+			chai.assert.isTrue(tableDefinition.isTablePart(rowNode, readOnlyBlueprint)));
 	});
 });
