@@ -99,6 +99,12 @@ function TeiTableDefinition(options) {
 	var properties = {
 		selectorParts: selectorParts,
 
+		// Header row node selector
+		headerRowNodeSelector:
+			shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells
+				? `self::${row + headerRowFilter}`
+				: undefined,
+
 		// Finds
 		findHeaderRowNodesXPathQuery:
 			shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells
@@ -110,7 +116,7 @@ function TeiTableDefinition(options) {
 
 		findNonTableNodesPrecedingRowsXPathQuery:
 			'./*[self::' + row + ' => not() and following-sibling::' + row + ']',
-		findNonTableNodesFollowinggRowsXPathQuery:
+		findNonTableNodesFollowingRowsXPathQuery:
 			'./*[self::' + row + ' => not() and preceding-sibling::' + row + ']',
 
 		// Data
