@@ -60,7 +60,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  * @param  {Object}          [options.cell.regularAttribute]       Configuration options for an attribute to be set on a cell element when it is not a header cell
  * @param  {string}          [options.cell.regularAttribute.name]  The attribute name
  * @param  {string}          [options.cell.regularAttribute.value] The value to set
- * @param  {string}          [options.useDefaultContextMenu=true]  Whether or not to use a preconfigured context menu for elements within the table
+ * @param  {boolean}         [options.useDefaultContextMenu=true]  Whether or not to use a preconfigured context menu for elements within the table
  */
 export default function configureAsTeiTableElements(sxModule, options) {
 	options = options || {};
