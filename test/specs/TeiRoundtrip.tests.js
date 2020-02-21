@@ -1,13 +1,13 @@
-import Blueprint from 'fontoxml-blueprints/Blueprint';
-import CoreDocument from 'fontoxml-core/Document';
-import jsonMLMapper from 'fontoxml-dom-utils/jsonMLMapper';
-import indicesManager from 'fontoxml-indices/indicesManager';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
+import CoreDocument from 'fontoxml-core/src/Document.js';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
+import indicesManager from 'fontoxml-indices/src/indicesManager.js';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTableDefinition';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
 
-import mergeCells from 'fontoxml-table-flow/TableGridModel/mutations/merging/mergeCells';
-import splitSpanningCell from 'fontoxml-table-flow/TableGridModel/mutations/splitting/splitSpanningCell';
+import mergeCells from 'fontoxml-table-flow/src/TableGridModel/mutations/merging/mergeCells.js';
+import splitSpanningCell from 'fontoxml-table-flow/src/TableGridModel/mutations/splitting/splitSpanningCell.js';
 
 const mergeCellWithCellToTheRight = mergeCells.mergeCellWithCellToTheRight;
 const mergeCellWithCellToTheLeft = mergeCells.mergeCellWithCellToTheLeft;

@@ -1,10 +1,10 @@
-import Blueprint from 'fontoxml-blueprints/Blueprint';
-import CoreDocument from 'fontoxml-core/Document';
-import jsonMLMapper from 'fontoxml-dom-utils/jsonMLMapper';
-import indicesManager from 'fontoxml-indices/indicesManager';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
+import CoreDocument from 'fontoxml-core/src/Document.js';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
+import indicesManager from 'fontoxml-indices/src/indicesManager.js';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTableDefinition';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
 
 const stubFormat = {
 	synthesizer: {

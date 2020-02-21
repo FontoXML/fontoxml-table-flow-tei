@@ -1,9 +1,9 @@
-import Blueprint from 'fontoxml-blueprints/Blueprint';
-import CoreDocument from 'fontoxml-core/Document';
-import jsonMLMapper from 'fontoxml-dom-utils/jsonMLMapper';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
+import CoreDocument from 'fontoxml-core/src/Document.js';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTableDefinition';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
 
 describe('TEI: XML to GridModel', () => {
 	let documentNode;

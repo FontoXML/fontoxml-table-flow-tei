@@ -1,6 +1,6 @@
-import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint.js';
 import * as slimdom from 'slimdom';
-import TeiTableDefinition from 'fontoxml-table-flow-tei/table-definition/TeiTableDefinition';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
 
 describe('TeiTableDefinition', () => {
 	let documentNode;
