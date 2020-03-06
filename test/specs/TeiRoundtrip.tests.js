@@ -47,7 +47,7 @@ describe('TEI: XML to XML roundtrip', () => {
 		const tableDefinition = new TeiTableDefinition(options);
 		const tableNode = documentNode.firstChild;
 		const gridModel = tableDefinition.buildTableGridModel(tableNode, blueprint);
-		chai.assert.isOk(gridModel);
+		chai.assert.isUndefined(gridModel.error);
 
 		mutateGridModel(gridModel);
 
