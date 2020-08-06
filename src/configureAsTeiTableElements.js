@@ -33,6 +33,19 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  *	});
  *```
  *
+ * The cell element menu button widgets are added based on the existence of contextual operations on
+ * cell level. Make sure that only cell-specific operations are added to the cell widget, so that
+ * users are only given options relevant to them.
+ * Example on how you can add this element menu on the widget:
+ *
+ * ```
+ *	configureProperties(sxModule, 'self::cell', {
+ *		contextualOperations: [
+ *			{ name: 'contextual-set-total-cell', hideIn: ['context-menu'] }
+ *		]
+ *	});
+ * ```
+ *
  * @fontosdk
  *
  * @category add-on/fontoxml-table-flow-tei
