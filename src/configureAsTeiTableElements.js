@@ -29,7 +29,13 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  *			})
  *		],
  *		showInsertionWidget: true,
- *		showHighlightingWidget: true
+ *		showHighlightingWidget: true,
+ *		columnWidgetMenuOperations: [
+ *			{ contents: [{ name: 'column-delete-at-index' }] }
+ *		],
+ *		rowWidgetMenuOperations: [
+ *			{ contents: [{ name: 'contextual-row-delete' }] }
+ *		]
  *	});
  *```
  *
@@ -56,6 +62,8 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  * @param  {boolean}         [options.showInsertionWidget]         To add insertion buttons which insert a column or a row to a specific place, default false.
  * @param  {boolean}         [options.showHighlightingWidget]      To add highlighting bars which highlight columns and rows, and provide operations popover, default false.
  * @param  {Widget[]|null}   [options.rowBefore]                   To add row icon widgets by using {@link createIconWidget}. Row widgets are linked to the row elements of the table. Any widget can be added but only icon widget is supported.
+ * @param  {Object[]|null}   [options.columnWidgetMenuOperations]  To configure table widget menu for columns. It accepts an array of {@link ContextualOperation}s, but only supports "name" and "contents" properties. It is allowed to have only one layer of menu.
+ * @param  {Object[]|null}   [options.rowWidgetMenuOperations]     To configure table widget menu for rows. It accepts an array of {@link ContextualOperation}s, but only supports "name" and "contents" properties. It is allowed to have only one layer of menu.
  * @param  {Object}          [options.table]                       Options for the table element
  * @param  {string}          [options.table.namespaceURI='']       The namespace URI for this table
  * @param  {Object}          [options.row]                         Configuration options for the row element
@@ -77,6 +85,6 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  */
 export default function configureAsTeiTableElements(sxModule, options) {
 	options = options || {};
-	var tableDefinition = new TeiTableDefinition(options);
+	const tableDefinition = new TeiTableDefinition(options);
 	configureAsTableElements(sxModule, options, tableDefinition);
 }

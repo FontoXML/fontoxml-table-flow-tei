@@ -56,7 +56,13 @@ configureAsTeiTableElements(sxModule, {
 	showInsertionWidget: true,
 
 	// To add highlighting bars which highlight columns and rows, and provide operations popover, default false.
-	showHighlightingWidget: true
+	showHighlightingWidget: true,
+
+	// In TEI table, there are some operations in the column/row widget menus as default. But they can be overridden.
+ 	columnWidgetMenuOperations: [{ name: 'column-delete-at-index' }],
+ 	rowWidgetMenuOperations:[
+ 		{ contents: [{ name: 'contextual-row-delete' }]	}
+ 	]
 });
 ```
 

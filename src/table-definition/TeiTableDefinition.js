@@ -147,6 +147,14 @@ function TeiTableDefinition(options) {
 		setCellNodeAttributeStrategies: [
 			setAttributeStrategies.createColumnSpanAsAttributeStrategy('cols'),
 			setAttributeStrategies.createRowSpanAsAttributeStrategy('rows')
+		],
+
+		// Widget menu operations
+		columnWidgetMenuOperations: options.columnWidgetMenuOperations || [
+			{ contents: [{ name: 'column-delete-at-index' }] }
+		],
+		rowWidgetMenuOperations: options.rowWidgetMenuOperations || [
+			{ contents: [{ name: 'contextual-row-delete' }] }
 		]
 	};
 
