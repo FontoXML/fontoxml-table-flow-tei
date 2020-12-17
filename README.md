@@ -45,10 +45,18 @@ configureAsTeiTableElements(sxModule, {
 		}
 	},
 
-	// Use createIconWidget to add column icons before rows. Any widget can be added but only icon widget is supported.
+	// Use createIconWidget to add an icon before each row. Any widget can be added but only icon widget is supported.
 	rowBefore: [
 		createIconWidget('dot-circle-o', {
 			clickOperation: 'do-nothing'
+		})
+	],
+
+    // This widgets are before columns. All widgets are supported. Column widgets are linked to the cell elements in the first row. If there is even one merged cell (to left or right) in the first row, the widgets in columnBefore widget area are not rendered. Optional, defaults to an empty array.
+	columnBefore: [
+		createIconWidget('clock-o', {
+			clickOperation: 'lcTime-value-edit',
+			tooltipContent: 'Click here to edit the duration'
 		})
 	],
 
@@ -60,13 +68,13 @@ configureAsTeiTableElements(sxModule, {
 
 	// This XPath expression determines whether or not a table has the ability to be collapsed. Optional, defaults to 'false()'.
 	// $rowCount and $columnCount helper variables can also optionally be used in the XPath expression to make it easier to configure
-	// when the table should collapse i.e. '$rowCount > 5' which will allow tables with rows more than 5 to be able to be collapsed/uncollapsed 
+	// when the table should collapse i.e. '$rowCount > 5' which will allow tables with rows more than 5 to be able to be collapsed/uncollapsed
 	isCollapsibleQuery: 'false()'
-    
+
 	// This XPath expression determines whether a table that has the ability to be collapsed should start off as collapsed on initial load. Optional, defaults to 'true()'.
 	// $rowCount and $columnCount helper variables can also optionally be used in the XPath expression to make it easier to configure
 	// when the table should start off as collapsed i.e. '$rowCount > 10' means that tables that have more than 10 rows will initially start off as collapsed
-	// Note: This query is only evaluated on tables which have the ability to be collapsed using isCollapsibleQuery 
+	// Note: This query is only evaluated on tables which have the ability to be collapsed using isCollapsibleQuery
 	isInitiallyCollapsedQuery: 'true()'
 
 	// In TEI table, there are some operations in the column/row widget menus as default. But they can be overridden.
