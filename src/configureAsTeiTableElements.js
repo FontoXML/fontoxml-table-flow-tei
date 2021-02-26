@@ -66,9 +66,9 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  * @param  {number}          [options.priority]                          Selector priority for all elements configured by this function
  * @param  {boolean}         [options.showInsertionWidget]               To add insertion buttons which insert a column or a row to a specific place, default false.
  * @param  {boolean}         [options.showHighlightingWidget]            To add highlighting bars which highlight columns and rows, and provide operations popover, default false.
- * @param  {Widget[]|null}   [options.rowBefore]                         To add a single icon widget
+ * @param  {WidgetSubAreaByName|Widget[]|null}  [options.rowBefore]      To add a single icon widget
  * before each row by using {@link createIconWidget}. Row widgets are linked to the row elements of the table. Any widget can be added but only icon widget is supported.
- * @param  {Widget[]|null}   [options.columnBefore]                      To add one or multiple
+ * @param  {WidgetSubAreaByName|Widget[]|null}  [options.columnBefore]   To add one or multiple
  * widgets before each column. Column widgets are linked to the cell elements in the first row. If
  * there is even one merged cell (to left or right) in the first row, the widgets in columnBefore
  * widget area are not rendered.
