@@ -1,5 +1,6 @@
 ---
 category: add-on/fontoxml-table-flow-tei
+fontosdk: true
 ---
 
 # TEI table support
