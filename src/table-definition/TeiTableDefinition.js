@@ -5,10 +5,11 @@ import setAttributeStrategies from 'fontoxml-table-flow/src/setAttributeStrategi
 
 /**
  * Configures the table definition for TEI tables.
- *
- * @param {TeiTableOptions} options
  */
 class TeiTableDefinition extends TableDefinition {
+	/**
+	 * @param {TeiTableOptions} options
+	 */
 	constructor(options) {
 		var namespaceURI =
 			options.table && options.table.namespaceURI ? options.table.namespaceURI : '';
