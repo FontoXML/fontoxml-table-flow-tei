@@ -1,9 +1,9 @@
-import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
-import CoreDocument from 'fontoxml-core/src/Document.js';
-import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint';
+import CoreDocument from 'fontoxml-core/src/Document';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
 describe('TEI: XML to GridModel', () => {
 	let documentNode;
@@ -20,9 +20,9 @@ describe('TEI: XML to GridModel', () => {
 			cell: {
 				headerAttribute: {
 					name: 'role',
-					value: 'label'
-				}
-			}
+					value: 'label',
+				},
+			},
 		});
 	});
 
@@ -34,16 +34,19 @@ describe('TEI: XML to GridModel', () => {
 						'table',
 						{
 							cols: '1',
-							rows: '1'
+							rows: '1',
 						},
-						['row', ['cell']]
+						['row', ['cell']],
 					],
 					documentNode
 				)
 			);
 
 			const tableElement = documentNode.firstChild;
-			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableElement,
+				blueprint
+			);
 			chai.assert.isUndefined(gridModel.error);
 
 			chai.assert.equal(gridModel.getHeight(), 1);
@@ -58,19 +61,22 @@ describe('TEI: XML to GridModel', () => {
 						'table',
 						{
 							cols: '4',
-							rows: '4'
+							rows: '4',
 						},
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
-						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 					],
 					documentNode
 				)
 			);
 
 			const tableElement = documentNode.firstChild;
-			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableElement,
+				blueprint
+			);
 			chai.assert.isUndefined(gridModel.error);
 
 			chai.assert.equal(gridModel.getHeight(), 4);
@@ -85,7 +91,7 @@ describe('TEI: XML to GridModel', () => {
 						'table',
 						{
 							cols: '4',
-							rows: '4'
+							rows: '4',
 						},
 						[
 							'row',
@@ -93,18 +99,28 @@ describe('TEI: XML to GridModel', () => {
 							['?someProcessingInstruction', 'someContent'],
 							['cell'],
 							['cell'],
-							['cell']
+							['cell'],
 						],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
-						['row', ['cell'], ['cell'], ['!', 'some comment'], ['cell'], ['cell']],
-						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						[
+							'row',
+							['cell'],
+							['cell'],
+							['!', 'some comment'],
+							['cell'],
+							['cell'],
+						],
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 					],
 					documentNode
 				)
 			);
 
 			const tableElement = documentNode.firstChild;
-			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableElement,
+				blueprint
+			);
 			chai.assert.isUndefined(gridModel.error);
 
 			chai.assert.equal(gridModel.getHeight(), 4);
@@ -121,25 +137,28 @@ describe('TEI: XML to GridModel', () => {
 						'table',
 						{
 							cols: '4',
-							rows: '4'
+							rows: '4',
 						},
 						[
 							'row',
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
-							['cell', { role: 'label' }]
+							['cell', { role: 'label' }],
 						],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
-						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 					],
 					documentNode
 				)
 			);
 
 			const tableElement = documentNode.firstChild;
-			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableElement,
+				blueprint
+			);
 			chai.assert.isUndefined(gridModel.error);
 
 			chai.assert.equal(gridModel.getHeight(), 4);
@@ -154,31 +173,34 @@ describe('TEI: XML to GridModel', () => {
 						'table',
 						{
 							cols: '4',
-							rows: '4'
+							rows: '4',
 						},
 						[
 							'row',
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
-							['cell', { role: 'label' }]
+							['cell', { role: 'label' }],
 						],
 						[
 							'row',
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
 							['cell', { role: 'label' }],
-							['cell', { role: 'label' }]
+							['cell', { role: 'label' }],
 						],
 						['row', ['cell'], ['cell'], ['cell'], ['cell']],
-						['row', ['cell'], ['cell'], ['cell'], ['cell']]
+						['row', ['cell'], ['cell'], ['cell'], ['cell']],
 					],
 					documentNode
 				)
 			);
 
 			const tableElement = documentNode.firstChild;
-			const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableElement,
+				blueprint
+			);
 			chai.assert.isUndefined(gridModel.error);
 
 			chai.assert.equal(gridModel.getHeight(), 4);
@@ -196,19 +218,27 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
-							['row', ['cell', { cols: '2' }], ['cell'], ['cell']],
+							[
+								'row',
+								['cell', { cols: '2' }],
+								['cell'],
+								['cell'],
+							],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
 				);
 
 				const tableElement = documentNode.firstChild;
-				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+				const gridModel = tableDefinition.buildTableGridModel(
+					tableElement,
+					blueprint
+				);
 				chai.assert.isUndefined(gridModel.error);
 
 				chai.assert.equal(gridModel.getHeight(), 4);
@@ -223,24 +253,27 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
 							[
 								'row',
 								['cell', { role: 'label', cols: '2' }],
 								['cell', { role: 'label' }],
-								['cell', { role: 'label' }]
+								['cell', { role: 'label' }],
 							],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
 				);
 
 				const tableElement = documentNode.firstChild;
-				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+				const gridModel = tableDefinition.buildTableGridModel(
+					tableElement,
+					blueprint
+				);
 				chai.assert.isUndefined(gridModel.error);
 
 				chai.assert.equal(gridModel.getHeight(), 4);
@@ -255,12 +288,18 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
-							['row', ['cell', { cols: '2' }], ['cell'], ['cell'], ['cell']],
+							[
+								'row',
+								['cell', { cols: '2' }],
+								['cell'],
+								['cell'],
+								['cell'],
+							],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
@@ -269,7 +308,10 @@ describe('TEI: XML to GridModel', () => {
 				const tableElement = documentNode.firstChild;
 
 				chai.assert.property(
-					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					tableDefinition.buildTableGridModel(
+						tableElement,
+						blueprint
+					),
 					'error'
 				);
 			});
@@ -283,19 +325,28 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
-							['row', ['cell', { rows: '2' }], ['cell'], ['cell'], ['cell']],
+							[
+								'row',
+								['cell', { rows: '2' }],
+								['cell'],
+								['cell'],
+								['cell'],
+							],
 							['row', ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
 				);
 
 				const tableElement = documentNode.firstChild;
-				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+				const gridModel = tableDefinition.buildTableGridModel(
+					tableElement,
+					blueprint
+				);
 				chai.assert.isUndefined(gridModel.error);
 
 				chai.assert.equal(gridModel.getHeight(), 4);
@@ -310,12 +361,18 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
-							['row', ['cell', { rows: '2' }], ['cell'], ['cell'], ['cell']],
+							[
+								'row',
+								['cell', { rows: '2' }],
+								['cell'],
+								['cell'],
+								['cell'],
+							],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
@@ -324,7 +381,10 @@ describe('TEI: XML to GridModel', () => {
 				const tableElement = documentNode.firstChild;
 
 				chai.assert.property(
-					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					tableDefinition.buildTableGridModel(
+						tableElement,
+						blueprint
+					),
 					'error'
 				);
 			});
@@ -338,19 +398,27 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
-							['row', ['cell', { cols: '2', rows: '2' }], ['cell'], ['cell']],
+							[
+								'row',
+								['cell', { cols: '2', rows: '2' }],
+								['cell'],
+								['cell'],
+							],
 							['row', ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
 				);
 
 				const tableElement = documentNode.firstChild;
-				const gridModel = tableDefinition.buildTableGridModel(tableElement, blueprint);
+				const gridModel = tableDefinition.buildTableGridModel(
+					tableElement,
+					blueprint
+				);
 				chai.assert.isUndefined(gridModel.error);
 
 				chai.assert.equal(gridModel.getHeight(), 4);
@@ -365,18 +433,18 @@ describe('TEI: XML to GridModel', () => {
 							'table',
 							{
 								cols: '4',
-								rows: '4'
+								rows: '4',
 							},
 							[
 								'row',
 								['cell', { cols: '2', rows: '2' }],
 								['cell'],
 								['cell'],
-								['cell']
+								['cell'],
 							],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 							['row', ['cell'], ['cell'], ['cell'], ['cell']],
-							['row', ['cell'], ['cell'], ['cell'], ['cell']]
+							['row', ['cell'], ['cell'], ['cell'], ['cell']],
 						],
 						documentNode
 					)
@@ -385,7 +453,10 @@ describe('TEI: XML to GridModel', () => {
 				const tableElement = documentNode.firstChild;
 
 				chai.assert.property(
-					tableDefinition.buildTableGridModel(tableElement, blueprint),
+					tableDefinition.buildTableGridModel(
+						tableElement,
+						blueprint
+					),
 					'error'
 				);
 			});

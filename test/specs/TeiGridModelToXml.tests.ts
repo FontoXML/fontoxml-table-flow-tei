@@ -1,21 +1,21 @@
-import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
-import CoreDocument from 'fontoxml-core/src/Document.js';
-import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
-import indicesManager from 'fontoxml-indices/src/indicesManager.js';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint';
+import CoreDocument from 'fontoxml-core/src/Document';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
+import indicesManager from 'fontoxml-indices/src/indicesManager';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
 const stubFormat = {
 	synthesizer: {
-		completeStructure: () => true
+		completeStructure: () => true,
 	},
 	metadata: {
-		get: (_option, _node) => false
+		get: (_option, _node) => false,
 	},
 	validator: {
-		canContain: () => true
-	}
+		canContain: () => true,
+	},
 };
 
 describe('TEI: Grid model to XML', () => {
@@ -37,9 +37,9 @@ describe('TEI: Grid model to XML', () => {
 			cell: {
 				headerAttribute: {
 					name: 'role',
-					value: 'label'
-				}
-			}
+					value: 'label',
+				},
+			},
 		});
 		createTable = tableDefinition.getTableGridModelBuilder();
 
@@ -52,40 +52,56 @@ describe('TEI: Grid model to XML', () => {
 		it('can serialize a 1x1 table', () => {
 			const tableGridModel = createTable(1, 1, false, documentNode);
 			chai.assert.isTrue(
-				tableDefinition.applyToDom(tableGridModel, tableNode, blueprint, stubFormat)
+				tableDefinition.applyToDom(
+					tableGridModel,
+					tableNode,
+					blueprint,
+					stubFormat
+				)
 			);
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '1',
-					rows: '1'
-				},
-				['row', ['cell']]
-			]);
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
+				[
+					'table',
+					{
+						cols: '1',
+						rows: '1',
+					},
+					['row', ['cell']],
+				]
+			);
 		});
 
 		it('can serialize a 4x4 table', () => {
 			const tableGridModel = createTable(4, 4, false, documentNode);
 			chai.assert.isTrue(
-				tableDefinition.applyToDom(tableGridModel, tableNode, blueprint, stubFormat)
+				tableDefinition.applyToDom(
+					tableGridModel,
+					tableNode,
+					blueprint,
+					stubFormat
+				)
 			);
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '4',
-					rows: '4'
-				},
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
-			]);
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
+				[
+					'table',
+					{
+						cols: '4',
+						rows: '4',
+					},
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				]
+			);
 		});
 	});
 
@@ -93,28 +109,36 @@ describe('TEI: Grid model to XML', () => {
 		it('can serialize a 4x4 table', () => {
 			const tableGridModel = createTable(4, 4, true, documentNode);
 			chai.assert.isTrue(
-				tableDefinition.applyToDom(tableGridModel, tableNode, blueprint, stubFormat)
+				tableDefinition.applyToDom(
+					tableGridModel,
+					tableNode,
+					blueprint,
+					stubFormat
+				)
 			);
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '4',
-					rows: '4'
-				},
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
 				[
-					'row',
-					['cell', { role: 'label' }],
-					['cell', { role: 'label' }],
-					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
-				],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
-			]);
+					'table',
+					{
+						cols: '4',
+						rows: '4',
+					},
+					[
+						'row',
+						['cell', { role: 'label' }],
+						['cell', { role: 'label' }],
+						['cell', { role: 'label' }],
+						['cell', { role: 'label' }],
+					],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				]
+			);
 		});
 	});
 
@@ -128,22 +152,30 @@ describe('TEI: Grid model to XML', () => {
 			tableGridModel.setCellAtCoordinates(spanningCell, 1, 2);
 
 			chai.assert.isTrue(
-				tableDefinition.applyToDom(tableGridModel, tableNode, blueprint, stubFormat)
+				tableDefinition.applyToDom(
+					tableGridModel,
+					tableNode,
+					blueprint,
+					stubFormat
+				)
 			);
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '4',
-					rows: '4'
-				},
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell', { cols: '2' }], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
-			]);
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
+				[
+					'table',
+					{
+						cols: '4',
+						rows: '4',
+					},
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell', { cols: '2' }], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				]
+			);
 		});
 
 		it('can serialize a 4x4 table with 1 row spanning cell', () => {
@@ -164,17 +196,26 @@ describe('TEI: Grid model to XML', () => {
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '4',
-					rows: '4'
-				},
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell', { rows: '2' }], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
-			]);
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
+				[
+					'table',
+					{
+						cols: '4',
+						rows: '4',
+					},
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					[
+						'row',
+						['cell'],
+						['cell', { rows: '2' }],
+						['cell'],
+						['cell'],
+					],
+					['row', ['cell'], ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				]
+			);
 		});
 
 		it('can serialize a 4x4 table with 1 column and row spanning cell', () => {
@@ -199,17 +240,25 @@ describe('TEI: Grid model to XML', () => {
 
 			blueprint.realize();
 			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), [
-				'table',
-				{
-					cols: '4',
-					rows: '4'
-				},
-				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell', { cols: '2', rows: '2' }], ['cell']],
-				['row', ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
-			]);
+			chai.assert.deepEqual(
+				jsonMLMapper.serialize(documentNode.firstChild),
+				[
+					'table',
+					{
+						cols: '4',
+						rows: '4',
+					},
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+					[
+						'row',
+						['cell'],
+						['cell', { cols: '2', rows: '2' }],
+						['cell'],
+					],
+					['row', ['cell'], ['cell']],
+					['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				]
+			);
 		});
 	});
 });

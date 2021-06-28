@@ -1,5 +1,11 @@
-import configureAsTableElements from 'fontoxml-table-flow/src/configureAsTableElements.js';
-import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
+import type {
+	AllowExpansionInContentView,
+	Widget,
+	WidgetSubAreaByName,
+} from 'fontoxml-families/src/types';
+import type { XPathQuery } from 'fontoxml-selectors/src/types';
+import configureAsTableElements from 'fontoxml-table-flow/src/configureAsTableElements';
+import TeiTableDefinition from './table-definition/TeiTableDefinition';
 
 /**
  * Configure TEI tables.
@@ -116,7 +122,46 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition.js';
  *                                                                                          $columnCount helper variables can optionally be used in this XPath expression
  *                                                                                          which evaluate to the total rows and total columns in a table.
  */
-export default function configureAsTeiTableElements(sxModule, options) {
+export default function configureAsTeiTableElements(
+	sxModule: Object,
+	options?: {
+		priority?: number;
+		allowExpansionInContentView?: AllowExpansionInContentView;
+		showInsertionWidget?: boolean;
+		showHighlightingWidget?: boolean;
+		rowBefore?: WidgetSubAreaByName | Array<Widget> | null;
+		columnBefore?: WidgetSubAreaByName | Array<Widget> | null;
+		columnWidgetMenuOperations?: Array<Object> | null;
+		rowWidgetMenuOperations?: Array<Object> | null;
+		table?: {
+			namespaceURI?: string;
+		};
+		row?: {
+			headerAttribute?: {
+				name?: string;
+				value?: string;
+			};
+			regularAttribute?: {
+				name?: string;
+				value?: string;
+			};
+		};
+		cell?: {
+			defaultTextContainer?: string;
+			headerAttribute?: {
+				name?: string;
+				value?: string;
+			};
+			regularAttribute?: {
+				name?: string;
+				value?: string;
+			};
+		};
+		useDefaultContextMenu?: boolean;
+		isCollapsibleQuery?: XPathQuery;
+		isInitiallyCollapsedQuery?: XPathQuery;
+	}
+): void {
 	options = options || {};
 	const tableDefinition = new TeiTableDefinition(options);
 	configureAsTableElements(sxModule, options, tableDefinition);

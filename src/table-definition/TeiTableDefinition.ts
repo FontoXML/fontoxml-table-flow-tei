@@ -1,7 +1,8 @@
-import TableDefinition from 'fontoxml-table-flow/src/TableDefinition.js';
-import createCreateCellNodeStrategy from 'fontoxml-table-flow/src/createCreateCellNodeStrategy.js';
-import createCreateRowStrategy from 'fontoxml-table-flow/src/createCreateRowStrategy.js';
-import setAttributeStrategies from 'fontoxml-table-flow/src/setAttributeStrategies.js';
+import TableDefinition from 'fontoxml-table-flow/src/TableDefinition';
+import createCreateCellNodeStrategy from 'fontoxml-table-flow/src/createCreateCellNodeStrategy';
+import createCreateRowStrategy from 'fontoxml-table-flow/src/createCreateRowStrategy';
+import setAttributeStrategies from 'fontoxml-table-flow/src/setAttributeStrategies';
+import type { TeiTableOptions } from 'fontoxml-typescript-migration-debt/src/types';
 
 /**
  * Configures the table definition for TEI tables.
@@ -10,11 +11,14 @@ class TeiTableDefinition extends TableDefinition {
 	/**
 	 * @param {TeiTableOptions} options
 	 */
-	constructor(options) {
+	constructor(options: TeiTableOptions) {
 		var namespaceURI =
-			options.table && options.table.namespaceURI ? options.table.namespaceURI : '';
+			options.table && options.table.namespaceURI
+				? options.table.namespaceURI
+				: '';
 
-		var shouldSetAttributeForHeaderRows = options.row && options.row.headerAttribute;
+		var shouldSetAttributeForHeaderRows =
+			options.row && options.row.headerAttribute;
 		var headerRowAttributeName = shouldSetAttributeForHeaderRows
 			? options.row.headerAttribute.name
 			: '';
@@ -22,7 +26,8 @@ class TeiTableDefinition extends TableDefinition {
 			? options.row.headerAttribute.value
 			: '';
 
-		var shouldSetAttributeForNormalRows = options.row && options.row.regularAttribute;
+		var shouldSetAttributeForNormalRows =
+			options.row && options.row.regularAttribute;
 		var normalRowAttributeName = shouldSetAttributeForNormalRows
 			? options.row.regularAttribute.name
 			: '';
@@ -30,7 +35,8 @@ class TeiTableDefinition extends TableDefinition {
 			? options.row.regularAttribute.value
 			: '';
 
-		var shouldSetAttributeForHeaderCells = options.cell && options.cell.headerAttribute;
+		var shouldSetAttributeForHeaderCells =
+			options.cell && options.cell.headerAttribute;
 		var headerCellAttributeName = shouldSetAttributeForHeaderCells
 			? options.cell.headerAttribute.name
 			: '';
@@ -38,7 +44,8 @@ class TeiTableDefinition extends TableDefinition {
 			? options.cell.headerAttribute.value
 			: '';
 
-		var shouldSetAttributeForNormalCells = options.cell && options.cell.regularAttribute;
+		var shouldSetAttributeForNormalCells =
+			options.cell && options.cell.regularAttribute;
 		var normalCellAttributeName = shouldSetAttributeForNormalCells
 			? options.cell.regularAttribute.name
 			: '';
@@ -55,16 +62,25 @@ class TeiTableDefinition extends TableDefinition {
 					? '[' + options.table.tableFilterSelector + ']'
 					: ''),
 			row: namespaceSelector + 'row',
-			cell: namespaceSelector + 'cell'
+			cell: namespaceSelector + 'cell',
 		};
 
 		var headerRowFilter = '';
 		var bodyRowFilter = '';
 
 		if (shouldSetAttributeForHeaderRows) {
-			headerRowFilter += '[@' + headerRowAttributeName + '="' + headerRowAttributeValue + '"';
+			headerRowFilter +=
+				'[@' +
+				headerRowAttributeName +
+				'="' +
+				headerRowAttributeValue +
+				'"';
 			bodyRowFilter +=
-				'[(@' + headerRowAttributeName + '="' + headerRowAttributeValue + '") => not()';
+				'[(@' +
+				headerRowAttributeName +
+				'="' +
+				headerRowAttributeValue +
+				'") => not()';
 		}
 
 		if (shouldSetAttributeForHeaderCells) {
@@ -88,7 +104,10 @@ class TeiTableDefinition extends TableDefinition {
 				'") => not()';
 		}
 
-		if (shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells) {
+		if (
+			shouldSetAttributeForHeaderRows ||
+			shouldSetAttributeForHeaderCells
+		) {
 			headerRowFilter += ']';
 			bodyRowFilter += ']';
 		}
@@ -103,13 +122,15 @@ class TeiTableDefinition extends TableDefinition {
 
 			// Header row node selector
 			headerRowNodeSelector:
-				shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells
+				shouldSetAttributeForHeaderRows ||
+				shouldSetAttributeForHeaderCells
 					? `self::${row + headerRowFilter}`
 					: undefined,
 
 			// Finds
 			findHeaderRowNodesXPathQuery:
-				shouldSetAttributeForHeaderRows || shouldSetAttributeForHeaderCells
+				shouldSetAttributeForHeaderRows ||
+				shouldSetAttributeForHeaderCells
 					? './' + row + headerRowFilter
 					: '()',
 			findBodyRowNodesXPathQuery: './' + row + bodyRowFilter,
@@ -117,9 +138,17 @@ class TeiTableDefinition extends TableDefinition {
 			findCellNodesXPathQuery: './' + cell,
 
 			findNonTableNodesPrecedingRowsXPathQuery:
-				'./*[self::' + row + ' => not() and following-sibling::' + row + ']',
+				'./*[self::' +
+				row +
+				' => not() and following-sibling::' +
+				row +
+				']',
 			findNonTableNodesFollowingRowsXPathQuery:
-				'./*[self::' + row + ' => not() and preceding-sibling::' + row + ']',
+				'./*[self::' +
+				row +
+				' => not() and preceding-sibling::' +
+				row +
+				']',
 
 			// Data
 			getNumberOfColumnsXPathQuery:
@@ -135,29 +164,38 @@ class TeiTableDefinition extends TableDefinition {
 				'let $cols := ./@cols => number() return if ($cols) then $cols else 1',
 
 			// Creates
-			createCellNodeStrategy: createCreateCellNodeStrategy(namespaceURI, 'cell'),
+			createCellNodeStrategy: createCreateCellNodeStrategy(
+				namespaceURI,
+				'cell'
+			),
 			createRowStrategy: createCreateRowStrategy(namespaceURI, 'row'),
 
 			// Set attributes
 			setTableNodeAttributeStrategies: [
-				setAttributeStrategies.createColumnCountAsAttributeStrategy('cols'),
-				setAttributeStrategies.createRowCountAsAttributeStrategy('rows')
+				setAttributeStrategies.createColumnCountAsAttributeStrategy(
+					'cols'
+				),
+				setAttributeStrategies.createRowCountAsAttributeStrategy(
+					'rows'
+				),
 			],
 
 			setRowNodeAttributeStrategies: [],
 
 			setCellNodeAttributeStrategies: [
-				setAttributeStrategies.createColumnSpanAsAttributeStrategy('cols'),
-				setAttributeStrategies.createRowSpanAsAttributeStrategy('rows')
+				setAttributeStrategies.createColumnSpanAsAttributeStrategy(
+					'cols'
+				),
+				setAttributeStrategies.createRowSpanAsAttributeStrategy('rows'),
 			],
 
 			// Widget menu operations
 			columnWidgetMenuOperations: options.columnWidgetMenuOperations || [
-				{ contents: [{ name: 'column-delete-at-index' }] }
+				{ contents: [{ name: 'column-delete-at-index' }] },
 			],
 			rowWidgetMenuOperations: options.rowWidgetMenuOperations || [
-				{ contents: [{ name: 'contextual-row-delete' }] }
-			]
+				{ contents: [{ name: 'contextual-row-delete' }] },
+			],
 		};
 
 		if (shouldSetAttributeForHeaderRows) {

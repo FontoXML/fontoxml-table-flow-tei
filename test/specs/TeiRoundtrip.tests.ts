@@ -1,13 +1,13 @@
-import Blueprint from 'fontoxml-blueprints/src/Blueprint.js';
-import CoreDocument from 'fontoxml-core/src/Document.js';
-import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper.js';
-import indicesManager from 'fontoxml-indices/src/indicesManager.js';
+import Blueprint from 'fontoxml-blueprints/src/Blueprint';
+import CoreDocument from 'fontoxml-core/src/Document';
+import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
+import indicesManager from 'fontoxml-indices/src/indicesManager';
 import * as slimdom from 'slimdom';
 
-import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition.js';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
-import mergeCells from 'fontoxml-table-flow/src/TableGridModel/mutations/merging/mergeCells.js';
-import splitSpanningCell from 'fontoxml-table-flow/src/TableGridModel/mutations/splitting/splitSpanningCell.js';
+import mergeCells from 'fontoxml-table-flow/src/TableGridModel/mutations/merging/mergeCells';
+import splitSpanningCell from 'fontoxml-table-flow/src/TableGridModel/mutations/splitting/splitSpanningCell';
 
 const mergeCellWithCellToTheRight = mergeCells.mergeCellWithCellToTheRight;
 const mergeCellWithCellToTheLeft = mergeCells.mergeCellWithCellToTheLeft;
@@ -19,15 +19,15 @@ const splitCellIntoColumns = splitSpanningCell.splitCellIntoColumns;
 
 const stubFormat = {
 	synthesizer: {
-		completeStructure: () => true
+		completeStructure: () => true,
 	},
 	metadata: {
-		get: (_option, _node) => false
+		get: (_option, _node) => false,
 	},
 	validator: {
 		canContain: () => true,
-		validateDown: () => []
-	}
+		validateDown: () => [],
+	},
 };
 
 describe('TEI: XML to XML roundtrip', () => {
@@ -42,23 +42,39 @@ describe('TEI: XML to XML roundtrip', () => {
 		blueprint = new Blueprint(coreDocument.dom);
 	});
 
-	function transformTable(jsonIn, jsonOut, options = {}, mutateGridModel = () => {}) {
+	function transformTable(
+		jsonIn,
+		jsonOut,
+		options = {},
+		mutateGridModel = () => {}
+	) {
 		coreDocument.dom.mutate(() => jsonMLMapper.parse(jsonIn, documentNode));
 
 		const tableDefinition = new TeiTableDefinition(options);
 		const tableNode = documentNode.firstChild;
-		const gridModel = tableDefinition.buildTableGridModel(tableNode, blueprint);
+		const gridModel = tableDefinition.buildTableGridModel(
+			tableNode,
+			blueprint
+		);
 		chai.assert.isUndefined(gridModel.error);
 
 		mutateGridModel(gridModel);
 
-		const success = tableDefinition.applyToDom(gridModel, tableNode, blueprint, stubFormat);
+		const success = tableDefinition.applyToDom(
+			gridModel,
+			tableNode,
+			blueprint,
+			stubFormat
+		);
 		chai.assert.isTrue(success);
 
 		blueprint.realize();
 		// The changes will be set to merge with the base index, this needs to be commited.
 		indicesManager.getIndexSet().commitMerge();
-		chai.assert.deepEqual(jsonMLMapper.serialize(documentNode.firstChild), jsonOut);
+		chai.assert.deepEqual(
+			jsonMLMapper.serialize(documentNode.firstChild),
+			jsonOut
+		);
 	}
 
 	describe('Without changes', () => {
@@ -67,18 +83,18 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '1',
-					rows: '1'
+					rows: '1',
 				},
-				['row', ['cell']]
+				['row', ['cell']],
 			];
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '1',
-					rows: '1'
+					rows: '1',
 				},
-				['row', ['cell']]
+				['row', ['cell']],
 			];
 
 			const options = {};
@@ -91,24 +107,24 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -123,41 +139,42 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.increaseHeaderRowCount(1);
+			const mutateGridModel = (gridModel) =>
+				gridModel.increaseHeaderRowCount(1);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {
 				cell: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
-					}
-				}
+						value: 'label',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options, mutateGridModel);
@@ -168,53 +185,54 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.increaseHeaderRowCount(1);
+			const mutateGridModel = (gridModel) =>
+				gridModel.increaseHeaderRowCount(1);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {
 				cell: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
-					}
-				}
+						value: 'label',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options, mutateGridModel);
@@ -225,53 +243,54 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.decreaseHeaderRowCount();
+			const mutateGridModel = (gridModel) =>
+				gridModel.decreaseHeaderRowCount();
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {
 				cell: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
-					}
-				}
+						value: 'label',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options, mutateGridModel);
@@ -282,41 +301,42 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.decreaseHeaderRowCount();
+			const mutateGridModel = (gridModel) =>
+				gridModel.decreaseHeaderRowCount();
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {
 				cell: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
-					}
-				}
+						value: 'label',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options, mutateGridModel);
@@ -327,21 +347,22 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.increaseHeaderRowCount(1);
+			const mutateGridModel = (gridModel) =>
+				gridModel.increaseHeaderRowCount(1);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
@@ -349,7 +370,7 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
@@ -357,7 +378,7 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
+					['cell', { role: 'data' }],
 				],
 				[
 					'row',
@@ -365,7 +386,7 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
+					['cell', { role: 'data' }],
 				],
 				[
 					'row',
@@ -373,31 +394,31 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
-				]
+					['cell', { role: 'data' }],
+				],
 			];
 
 			const options = {
 				row: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
+						value: 'label',
 					},
 					regularAttribute: {
 						name: 'role',
-						value: 'data'
-					}
+						value: 'data',
+					},
 				},
 				cell: {
 					headerAttribute: {
 						name: 'role',
-						value: 'label'
+						value: 'label',
 					},
 					regularAttribute: {
 						name: 'role',
-						value: 'data'
-					}
-				}
+						value: 'data',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options, mutateGridModel);
@@ -410,27 +431,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertRow(0, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertRow(0, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '5'
+					rows: '5',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -443,27 +465,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertRow(2, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertRow(2, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '5'
+					rows: '5',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -476,27 +499,27 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertRow(3, true);
+			const mutateGridModel = (gridModel) => gridModel.insertRow(3, true);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '5'
+					rows: '5',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -509,45 +532,46 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertRow(0, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertRow(0, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '5'
+					rows: '5',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -560,57 +584,57 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertRow(1, true);
+			const mutateGridModel = (gridModel) => gridModel.insertRow(1, true);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '5'
+					rows: '5',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -625,25 +649,25 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(0);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -656,25 +680,25 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(2);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(2);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -687,25 +711,25 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(3);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(3);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -718,31 +742,31 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(0);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -755,43 +779,43 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(0);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -804,43 +828,43 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteRow(1);
+			const mutateGridModel = (gridModel) => gridModel.deleteRow(1);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '3'
+					rows: '3',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -855,26 +879,27 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(0, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(0, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -887,26 +912,27 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(2, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(2, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -919,26 +945,27 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(3, true);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(3, true);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -951,27 +978,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(0, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(0, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
@@ -979,11 +1007,11 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -996,27 +1024,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(2, false);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(2, false);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
@@ -1024,11 +1053,11 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1041,27 +1070,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.insertColumn(3, true);
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertColumn(3, true);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '5',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
@@ -1069,11 +1099,11 @@ describe('TEI: XML to XML roundtrip', () => {
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1088,26 +1118,26 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(0);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(0);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1120,26 +1150,26 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(2);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(2);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1152,26 +1182,26 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(3);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(3);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1184,37 +1214,37 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(0);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(0);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1227,37 +1257,37 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(2);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(2);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1270,37 +1300,37 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel => gridModel.deleteColumn(3);
+			const mutateGridModel = (gridModel) => gridModel.deleteColumn(3);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'label' }],
 					['cell', { role: 'label' }],
-					['cell', { role: 'label' }]
+					['cell', { role: 'label' }],
 				],
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1315,25 +1345,29 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
-				mergeCellWithCellAbove(gridModel, gridModel.getCellAtCoordinates(1, 1), blueprint);
+			const mutateGridModel = (gridModel) =>
+				mergeCellWithCellAbove(
+					gridModel,
+					gridModel.getCellAtCoordinates(1, 1),
+					blueprint
+				);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell', { rows: '2' }], ['cell']],
 				['row', ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1346,14 +1380,14 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
+			const mutateGridModel = (gridModel) =>
 				mergeCellWithCellToTheRight(
 					gridModel,
 					gridModel.getCellAtCoordinates(1, 1),
@@ -1364,11 +1398,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell', { cols: '2' }]],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1381,25 +1415,29 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
-				mergeCellWithCellBelow(gridModel, gridModel.getCellAtCoordinates(1, 1), blueprint);
+			const mutateGridModel = (gridModel) =>
+				mergeCellWithCellBelow(
+					gridModel,
+					gridModel.getCellAtCoordinates(1, 1),
+					blueprint
+				);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell', { rows: '2' }], ['cell']],
-				['row', ['cell'], ['cell']]
+				['row', ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1412,14 +1450,14 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
+			const mutateGridModel = (gridModel) =>
 				mergeCellWithCellToTheLeft(
 					gridModel,
 					gridModel.getCellAtCoordinates(1, 1),
@@ -1430,11 +1468,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell', { cols: '2' }], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1449,25 +1487,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell', { cols: '2' }]],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
-				splitCellIntoColumns(gridModel, gridModel.getCellAtCoordinates(1, 1));
+			const mutateGridModel = (gridModel) =>
+				splitCellIntoColumns(
+					gridModel,
+					gridModel.getCellAtCoordinates(1, 1)
+				);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1480,25 +1521,28 @@ describe('TEI: XML to XML roundtrip', () => {
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell', { rows: '2' }], ['cell']],
-				['row', ['cell'], ['cell']]
+				['row', ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = gridModel =>
-				splitCellIntoRows(gridModel, gridModel.getCellAtCoordinates(1, 1));
+			const mutateGridModel = (gridModel) =>
+				splitCellIntoRows(
+					gridModel,
+					gridModel.getCellAtCoordinates(1, 1)
+				);
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '3',
-					rows: '3'
+					rows: '3',
 				},
 				['row', ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1514,19 +1558,19 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const options = {};
@@ -1540,52 +1584,52 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
 				[
 					'row',
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
+					['cell', { role: 'data' }],
 				],
 				[
 					'row',
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
+					['cell', { role: 'data' }],
 				],
 				[
 					'row',
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
+					['cell', { role: 'data' }],
 				],
 				[
 					'row',
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
 					['cell', { role: 'data' }],
-					['cell', { role: 'data' }]
-				]
+					['cell', { role: 'data' }],
+				],
 			];
 
 			const options = {
 				cell: {
 					regularAttribute: {
 						name: 'role',
-						value: 'data'
-					}
-				}
+						value: 'data',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options);
@@ -1597,28 +1641,56 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', ['cell'], ['cell'], ['cell'], ['cell']]
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
 			const jsonOut = [
 				'table',
 				{
 					cols: '4',
-					rows: '4'
+					rows: '4',
 				},
-				['row', { role: 'data' }, ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', { role: 'data' }, ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', { role: 'data' }, ['cell'], ['cell'], ['cell'], ['cell']],
-				['row', { role: 'data' }, ['cell'], ['cell'], ['cell'], ['cell']]
+				[
+					'row',
+					{ role: 'data' },
+					['cell'],
+					['cell'],
+					['cell'],
+					['cell'],
+				],
+				[
+					'row',
+					{ role: 'data' },
+					['cell'],
+					['cell'],
+					['cell'],
+					['cell'],
+				],
+				[
+					'row',
+					{ role: 'data' },
+					['cell'],
+					['cell'],
+					['cell'],
+					['cell'],
+				],
+				[
+					'row',
+					{ role: 'data' },
+					['cell'],
+					['cell'],
+					['cell'],
+					['cell'],
+				],
 			];
 
 			const options = {
 				row: {
 					regularAttribute: {
 						name: 'role',
-						value: 'data'
-					}
-				}
+						value: 'data',
+					},
+				},
 			};
 
 			transformTable(jsonIn, jsonOut, options);
