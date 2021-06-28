@@ -1,7 +1,7 @@
-import TableDefinition from 'fontoxml-table-flow/src/TableDefinition';
 import createCreateCellNodeStrategy from 'fontoxml-table-flow/src/createCreateCellNodeStrategy';
 import createCreateRowStrategy from 'fontoxml-table-flow/src/createCreateRowStrategy';
 import setAttributeStrategies from 'fontoxml-table-flow/src/setAttributeStrategies';
+import TableDefinition from 'fontoxml-table-flow/src/TableDefinition';
 import type { TeiTableOptions } from 'fontoxml-typescript-migration-debt/src/types';
 
 /**
@@ -12,96 +12,75 @@ class TeiTableDefinition extends TableDefinition {
 	 * @param {TeiTableOptions} options
 	 */
 	constructor(options: TeiTableOptions) {
-		var namespaceURI =
+		const namespaceURI =
 			options.table && options.table.namespaceURI
 				? options.table.namespaceURI
 				: '';
 
-		var shouldSetAttributeForHeaderRows =
+		const shouldSetAttributeForHeaderRows =
 			options.row && options.row.headerAttribute;
-		var headerRowAttributeName = shouldSetAttributeForHeaderRows
+		const headerRowAttributeName = shouldSetAttributeForHeaderRows
 			? options.row.headerAttribute.name
 			: '';
-		var headerRowAttributeValue = shouldSetAttributeForHeaderRows
+		const headerRowAttributeValue = shouldSetAttributeForHeaderRows
 			? options.row.headerAttribute.value
 			: '';
 
-		var shouldSetAttributeForNormalRows =
+		const shouldSetAttributeForNormalRows =
 			options.row && options.row.regularAttribute;
-		var normalRowAttributeName = shouldSetAttributeForNormalRows
+		const normalRowAttributeName = shouldSetAttributeForNormalRows
 			? options.row.regularAttribute.name
 			: '';
-		var normalRowAttributeValue = shouldSetAttributeForNormalRows
+		const normalRowAttributeValue = shouldSetAttributeForNormalRows
 			? options.row.regularAttribute.value
 			: '';
 
-		var shouldSetAttributeForHeaderCells =
+		const shouldSetAttributeForHeaderCells =
 			options.cell && options.cell.headerAttribute;
-		var headerCellAttributeName = shouldSetAttributeForHeaderCells
+		const headerCellAttributeName = shouldSetAttributeForHeaderCells
 			? options.cell.headerAttribute.name
 			: '';
-		var headerCellAttributeValue = shouldSetAttributeForHeaderCells
+		const headerCellAttributeValue = shouldSetAttributeForHeaderCells
 			? options.cell.headerAttribute.value
 			: '';
 
-		var shouldSetAttributeForNormalCells =
+		const shouldSetAttributeForNormalCells =
 			options.cell && options.cell.regularAttribute;
-		var normalCellAttributeName = shouldSetAttributeForNormalCells
+		const normalCellAttributeName = shouldSetAttributeForNormalCells
 			? options.cell.regularAttribute.name
 			: '';
-		var normalCellAttributeValue = shouldSetAttributeForNormalCells
+		const normalCellAttributeValue = shouldSetAttributeForNormalCells
 			? options.cell.regularAttribute.value
 			: '';
 
-		var namespaceSelector = 'Q{' + namespaceURI + '}';
-		var selectorParts = {
-			table:
-				namespaceSelector +
-				'table' +
-				(options.table && options.table.tableFilterSelector
-					? '[' + options.table.tableFilterSelector + ']'
-					: ''),
-			row: namespaceSelector + 'row',
-			cell: namespaceSelector + 'cell',
+		const namespaceSelector = `Q{${namespaceURI}}`;
+		const selectorParts = {
+			table: `${namespaceSelector}table${
+				options.table && options.table.tableFilterSelector
+					? `[${options.table.tableFilterSelector}]`
+					: ''
+			}`,
+			row: `${namespaceSelector}row`,
+			cell: `${namespaceSelector}cell`,
 		};
 
-		var headerRowFilter = '';
-		var bodyRowFilter = '';
+		let headerRowFilter = '';
+		let bodyRowFilter = '';
 
 		if (shouldSetAttributeForHeaderRows) {
-			headerRowFilter +=
-				'[@' +
-				headerRowAttributeName +
-				'="' +
-				headerRowAttributeValue +
-				'"';
-			bodyRowFilter +=
-				'[(@' +
-				headerRowAttributeName +
-				'="' +
-				headerRowAttributeValue +
-				'") => not()';
+			headerRowFilter += `[@${headerRowAttributeName}="${headerRowAttributeValue}"`;
+			bodyRowFilter += `[(@${headerRowAttributeName}="${headerRowAttributeValue}") => not()`;
 		}
 
 		if (shouldSetAttributeForHeaderCells) {
-			headerRowFilter +=
-				(headerRowFilter !== '' ? ' or ' : '[') +
-				'child::' +
-				selectorParts.cell +
-				'/@' +
-				headerCellAttributeName +
-				'="' +
-				headerCellAttributeValue +
-				'"';
-			bodyRowFilter +=
-				(bodyRowFilter !== '' ? ' or ' : '[') +
-				'(child::' +
-				selectorParts.cell +
-				'/@' +
-				headerCellAttributeName +
-				'="' +
-				headerCellAttributeValue +
-				'") => not()';
+			headerRowFilter += `${
+				headerRowFilter !== '' ? ' or ' : '['
+			}child::${
+				selectorParts.cell
+			}/@${headerCellAttributeName}="${headerCellAttributeValue}"`;
+			bodyRowFilter += `${bodyRowFilter !== '' ? ' or ' : '['}(child::${
+				selectorParts.cell
+			}/@${headerCellAttributeName}="${headerCellAttributeValue}") => not()`;
 		}
 
 		if (
@@ -113,12 +92,12 @@ class TeiTableDefinition extends TableDefinition {
 		}
 
 		// Alias selector parts
-		var row = selectorParts.row;
-		var cell = selectorParts.cell;
+		const row = selectorParts.row;
+		const cell = selectorParts.cell;
 
 		// Properties object
-		var properties = {
-			selectorParts: selectorParts,
+		const properties = {
+			selectorParts,
 
 			// Header row node selector
 			headerRowNodeSelector:
@@ -131,33 +110,20 @@ class TeiTableDefinition extends TableDefinition {
 			findHeaderRowNodesXPathQuery:
 				shouldSetAttributeForHeaderRows ||
 				shouldSetAttributeForHeaderCells
-					? './' + row + headerRowFilter
+					? `./${row}${headerRowFilter}`
 					: '()',
-			findBodyRowNodesXPathQuery: './' + row + bodyRowFilter,
+			findBodyRowNodesXPathQuery: `./${row}${bodyRowFilter}`,
 
-			findCellNodesXPathQuery: './' + cell,
+			findCellNodesXPathQuery: `./${cell}`,
 
-			findNonTableNodesPrecedingRowsXPathQuery:
-				'./*[self::' +
-				row +
-				' => not() and following-sibling::' +
-				row +
-				']',
-			findNonTableNodesFollowingRowsXPathQuery:
-				'./*[self::' +
-				row +
-				' => not() and preceding-sibling::' +
-				row +
-				']',
+			findNonTableNodesPrecedingRowsXPathQuery: `./*[self::${row} => not() and following-sibling::${row}]`,
+			findNonTableNodesFollowingRowsXPathQuery: `./*[self::${row} => not() and preceding-sibling::${row}]`,
 
 			// Data
-			getNumberOfColumnsXPathQuery:
+			getNumberOfColumnsXPathQuery: `${
 				'let $cols := ./@cols => number() return if ($cols) then $cols else ' +
-				'(let $cells := (.//' +
-				row +
-				')[1]/' +
-				cell +
-				' return for $node in $cells return let $cols := $node/@cols => number() return if ($cols) then $cols else 1) => sum()',
+				'(let $cells := (.//'
+			}${row})[1]/${cell} return for $node in $cells return let $cols := $node/@cols => number() return if ($cols) then $cols else 1) => sum()`,
 			getRowSpanForCellNodeXPathQuery:
 				'let $rows := ./@rows => number() return if ($rows) then $rows else 1',
 			getColumnSpanForCellNodeXPathQuery:

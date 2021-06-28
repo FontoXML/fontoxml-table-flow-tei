@@ -1,13 +1,12 @@
+import * as slimdom from 'slimdom';
+
 import Blueprint from 'fontoxml-blueprints/src/Blueprint';
 import CoreDocument from 'fontoxml-core/src/Document';
 import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
 import indicesManager from 'fontoxml-indices/src/indicesManager';
-import * as slimdom from 'slimdom';
-
-import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
-
 import mergeCells from 'fontoxml-table-flow/src/TableGridModel/mutations/merging/mergeCells';
 import splitSpanningCell from 'fontoxml-table-flow/src/TableGridModel/mutations/splitting/splitSpanningCell';
+import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
 const mergeCellWithCellToTheRight = mergeCells.mergeCellWithCellToTheRight;
 const mergeCellWithCellToTheLeft = mergeCells.mergeCellWithCellToTheLeft;
@@ -1494,11 +1493,12 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (gridModel) => {
 				splitCellIntoColumns(
 					gridModel,
 					gridModel.getCellAtCoordinates(1, 1)
 				);
+			};
 
 			const jsonOut = [
 				'table',
@@ -1528,11 +1528,12 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (gridModel) => {
 				splitCellIntoRows(
 					gridModel,
 					gridModel.getCellAtCoordinates(1, 1)
 				);
+			};
 
 			const jsonOut = [
 				'table',

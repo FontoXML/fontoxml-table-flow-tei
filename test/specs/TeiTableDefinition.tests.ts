@@ -1,5 +1,6 @@
-import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import * as slimdom from 'slimdom';
+
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
 describe('TeiTableDefinition', () => {
@@ -25,23 +26,26 @@ describe('TeiTableDefinition', () => {
 	});
 
 	describe('isTable()', () => {
-		it('can recognize a table element', () =>
+		it('can recognize a table element', () => {
 			chai.assert.isTrue(
 				tableDefinition.isTable(tableNode, readOnlyBlueprint)
-			));
+			);
+		});
 	});
 
 	describe('isTableCell()', () => {
-		it('can recognize a cell element', () =>
+		it('can recognize a cell element', () => {
 			chai.assert.isTrue(
 				tableDefinition.isTableCell(cellNode, readOnlyBlueprint)
-			));
+			);
+		});
 	});
 
 	describe('isTablePart()', () => {
-		it('can recognize a table part', () =>
+		it('can recognize a table part', () => {
 			chai.assert.isTrue(
 				tableDefinition.isTablePart(rowNode, readOnlyBlueprint)
-			));
+			);
+		});
 	});
 });

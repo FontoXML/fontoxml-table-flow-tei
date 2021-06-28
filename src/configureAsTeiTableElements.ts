@@ -5,6 +5,7 @@ import type {
 } from 'fontoxml-families/src/types';
 import type { XPathQuery } from 'fontoxml-selectors/src/types';
 import configureAsTableElements from 'fontoxml-table-flow/src/configureAsTableElements';
+
 import TeiTableDefinition from './table-definition/TeiTableDefinition';
 
 /**
@@ -129,10 +130,10 @@ export default function configureAsTeiTableElements(
 		allowExpansionInContentView?: AllowExpansionInContentView;
 		showInsertionWidget?: boolean;
 		showHighlightingWidget?: boolean;
-		rowBefore?: WidgetSubAreaByName | Array<Widget> | null;
-		columnBefore?: WidgetSubAreaByName | Array<Widget> | null;
-		columnWidgetMenuOperations?: Array<Object> | null;
-		rowWidgetMenuOperations?: Array<Object> | null;
+		rowBefore?: Widget[] | WidgetSubAreaByName | null;
+		columnBefore?: Widget[] | WidgetSubAreaByName | null;
+		columnWidgetMenuOperations?: Object[] | null;
+		rowWidgetMenuOperations?: Object[] | null;
 		table?: {
 			namespaceURI?: string;
 		};

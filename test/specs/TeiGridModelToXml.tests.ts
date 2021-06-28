@@ -1,9 +1,9 @@
+import * as slimdom from 'slimdom';
+
 import Blueprint from 'fontoxml-blueprints/src/Blueprint';
 import CoreDocument from 'fontoxml-core/src/Document';
 import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
 import indicesManager from 'fontoxml-indices/src/indicesManager';
-import * as slimdom from 'slimdom';
-
 import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
 
 const stubFormat = {
