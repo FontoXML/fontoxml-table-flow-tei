@@ -11,7 +11,8 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
 /**
  * Configure TEI tables.
  *
- * Example usage for the table widgets:
+ * Check {@link fonto-documentation/docs/editor/fontoxml-editor-documentation/quickstarts/configure-tables.xml#id-d8cde415-f9e0-ba0c-14a5-cdb5f92d647d our guide}
+ * for more information on table widgets. Example usage for the table widgets:
  *
  *```
  *	configureAsTeiTableElements(sxModule, {
