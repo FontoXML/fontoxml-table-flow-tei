@@ -64,8 +64,8 @@ configureAsTeiTableElements(sxModule, {
 	// To add insertion buttons which insert a column or a row at a specific place, default false.
 	showInsertionWidget: true,
 
-	// To add highlighting bars which highlight columns and rows, and provide operations popover, default false.
-	showHighlightingWidget: true,
+	// To add selection bars which select columns and rows, and provide operations popover, default false.
+	showSelectionWidget: true,
 
 	// This XPath expression determines whether or not a table has the ability to be collapsed. Optional, defaults to 'false()'.
 	// $rowCount and $columnCount helper variables can also optionally be used in the XPath expression to make it easier to configure

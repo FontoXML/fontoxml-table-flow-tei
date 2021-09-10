@@ -40,7 +40,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  *			})
  *		],
  *		showInsertionWidget: true,
- *		showHighlightingWidget: true,
+ *		showSelectionWidget: true,
  *		columnWidgetMenuOperations: [
  *			{ contents: [{ name: 'column-delete-at-index' }] }
  *		],
@@ -75,7 +75,8 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  * @param  {AllowExpansionInContentView}        [options.allowExpansionInContentView]       Defines the availability of expansion of a table.
  * @param  {boolean}                            [options.showInsertionWidget]               To add insertion buttons which insert a column or a row to a specific
  *                                                                                          place, default false.
- * @param  {boolean}                            [options.showHighlightingWidget]            To add highlighting bars which highlight columns and rows, and provide
+ * @param  {boolean}                            [options.showHighlightingWidget]            This is @deprecated. Instead use showSelectionWidget.
+ * @param  {boolean}                            [options.showSelectionWidget]               To add selection bars which select columns and rows, and provide
  *                                                                                          operations popover, default false.
  * @param  {WidgetSubAreaByName|Widget[]|null}  [options.rowBefore]                         Used to add a single icon widget before each row using
  *                                                                                          {@link createIconWidget}. Row widgets are linked to the row elements of
@@ -130,7 +131,12 @@ export default function configureAsTeiTableElements(
 		priority?: number;
 		allowExpansionInContentView?: AllowExpansionInContentView;
 		showInsertionWidget?: boolean;
+		/**
+		 * @deprecated
+		 * Instead use showSelectionWidget.
+		 */
 		showHighlightingWidget?: boolean;
+		showSelectionWidget?: boolean;
 		rowBefore?: Widget[] | WidgetSubAreaByName | null;
 		columnBefore?: Widget[] | WidgetSubAreaByName | null;
 		columnWidgetMenuOperations?: Object[] | null;
