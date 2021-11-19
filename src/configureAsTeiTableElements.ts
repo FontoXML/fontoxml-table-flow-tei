@@ -1,8 +1,11 @@
 import type {
 	AllowExpansionInContentView,
+	DefaultTextContainer,
 	Widget,
 	WidgetSubAreaByName,
 } from 'fontoxml-families/src/types';
+import type { SxModule } from 'fontoxml-modular-schema-experience/src/sxManager';
+import type { ContextualOperation } from 'fontoxml-operations/src/types';
 import type { XPathQuery } from 'fontoxml-selectors/src/types';
 import configureAsTableElements from 'fontoxml-table-flow/src/configureAsTableElements';
 
@@ -69,7 +72,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  *
  * @category add-on/fontoxml-table-flow-tei
  *
- * @param  {Object}                             sxModule
+ * @param  {SxModule}                           sxModule
  * @param  {Object}                             [options]
  * @param  {number}                             [options.priority]                          Selector priority for all elements configured by this function.
  * @param  {AllowExpansionInContentView}        [options.allowExpansionInContentView]       Defines the availability of expansion of a table.
@@ -87,14 +90,14 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  *                                                                                          in columnBefore widget area are not rendered.
  *                                                                                          {@link fonto-documentation/docs/editor/api/index.xml#id-9d2b1ad5-bbc1-6c44-d491-16dc213c53f2 All widgets}
  *                                                                                          are supported.
- * @param  {Object[]|null}                      [options.columnWidgetMenuOperations]        To configure table widget menu for columns. It accepts an array of
+ * @param  {ContextualOperation[]|null}         [options.columnWidgetMenuOperations]        To configure table widget menu for columns. It accepts an array of
  *                                                                                          {@link ContextualOperation}s, but only supports "name" and "contents" properties.
  *                                                                                          It is allowed to have only one layer of menu.
- * @param  {Object[]|null}                      [options.rowWidgetMenuOperations]           To configure table widget menu for rows. It accepts an array of
+ * @param  {ContextualOperation[]|null}         [options.rowWidgetMenuOperations]           To configure table widget menu for rows. It accepts an array of
  *                                                                                          {@link ContextualOperation}s, but only supports "name" and "contents" properties.
  *                                                                                          It is allowed to have only one layer of menu.
  * @param  {Object}                             [options.table]                             Options for the table element.
- * @param  {string}                             [options.table.namespaceURI='']             The namespace URI for this table.
+ * @param  {string|null}                        [options.table.namespaceURI='']             The namespace URI for this table.
  * @param  {Object}                             [options.row]                               Configuration options for the row element.
  * @param  {Object}                             [options.row.headerAttribute]               Configuration options for an attribute to be set on a row element when it
  *                                                                                          is a header row.
@@ -105,7 +108,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  * @param  {string}                             [options.row.regularAttribute.name]         The attribute name.
  * @param  {string}                             [options.row.regularAttribute.value]        The value to set.
  * @param  {Object}                             [options.cell]                              Configuration options for the cell element.
- * @param  {string}                             [options.cell.defaultTextContainer]         The default text container for the cell element.
+ * @param  {DefaultTextContainer}               [options.cell.defaultTextContainer]         The default text container for the cell element.
  * @param  {Object}                             [options.cell.headerAttribute]              Configuration options for an attribute to be set on a cell element
  *                                                                                          when it is a header cell.
  * @param  {string}                             [options.cell.headerAttribute.name]         The attribute name.
@@ -126,7 +129,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  *                                                                                          which evaluate to the total rows and total columns in a table.
  */
 export default function configureAsTeiTableElements(
-	sxModule: Object,
+	sxModule: SxModule,
 	options?: {
 		priority?: number;
 		allowExpansionInContentView?: AllowExpansionInContentView;
@@ -139,10 +142,10 @@ export default function configureAsTeiTableElements(
 		showSelectionWidget?: boolean;
 		rowBefore?: Widget[] | WidgetSubAreaByName | null;
 		columnBefore?: Widget[] | WidgetSubAreaByName | null;
-		columnWidgetMenuOperations?: Object[] | null;
-		rowWidgetMenuOperations?: Object[] | null;
+		columnWidgetMenuOperations?: ContextualOperation[] | null;
+		rowWidgetMenuOperations?: ContextualOperation[] | null;
 		table?: {
-			namespaceURI?: string;
+			namespaceURI?: string | null;
 		};
 		row?: {
 			headerAttribute?: {
@@ -155,7 +158,7 @@ export default function configureAsTeiTableElements(
 			};
 		};
 		cell?: {
-			defaultTextContainer?: string;
+			defaultTextContainer?: DefaultTextContainer;
 			headerAttribute?: {
 				name?: string;
 				value?: string;
