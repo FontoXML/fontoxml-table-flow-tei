@@ -5,11 +5,12 @@ import TableDefinition from 'fontoxml-table-flow/src/TableDefinition';
 import type { TeiTableOptions } from 'fontoxml-typescript-migration-debt/src/types';
 
 /**
+ * @remarks
  * Configures the table definition for TEI tables.
  */
 class TeiTableDefinition extends TableDefinition {
 	/**
-	 * @param {TeiTableOptions} options
+	 * @param options -
 	 */
 	constructor(options: TeiTableOptions) {
 		const namespaceURI =
