@@ -82,7 +82,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  * @param options.allowExpansionInContentView - Defines the availability of expansion of a table.
  * @param options.showInsertionWidget         - To add insertion buttons which insert a column or a row
  *                                              to a specific place, default false.
- * @param options.showHighlightingWidget      - This is @deprecated. Instead use showSelectionWidget.
+ * @param options.showHighlightingWidget      - This is deprecated. Instead use showSelectionWidget.
  * @param options.showSelectionWidget         - To add selection bars which select columns and rows,
  *                                              and provide operations popover, default false.
  * @param options.rowBefore                   - Used to add a single icon widget before each row using
