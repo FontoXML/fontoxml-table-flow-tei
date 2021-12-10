@@ -156,12 +156,17 @@ class TeiTableDefinition extends TableDefinition {
 				setAttributeStrategies.createRowSpanAsAttributeStrategy('rows'),
 			],
 
+			// Deprecated
+			columnWidgetMenuOperations: options.columnWidgetMenuOperations,
+			rowWidgetMenuOperations: options.rowWidgetMenuOperations,
 			// Widget menu operations
-			columnWidgetMenuOperations: options.columnWidgetMenuOperations || [
-				{ contents: [{ name: 'column-delete-at-index' }] },
-			],
-			rowWidgetMenuOperations: options.rowWidgetMenuOperations || [
-				{ contents: [{ name: 'contextual-row-delete' }] },
+			// Widget menu operations
+			columnsWidgetMenuOperations:
+				options.columnsWidgetMenuOperations || [
+					{ contents: [{ name: 'columns-delete' }] },
+				],
+			rowsWidgetMenuOperations: options.rowsWidgetMenuOperations || [
+				{ contents: [{ name: 'rows-delete' }] },
 			],
 		};
 

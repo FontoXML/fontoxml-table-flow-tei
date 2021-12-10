@@ -47,12 +47,13 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  * 	],
  * 	showInsertionWidget: true,
  * 	showSelectionWidget: true,
- * 	columnWidgetMenuOperations: [
- * 		{ contents: [{ name: 'column-delete-at-index' }] }
- * 	],
- * 	rowWidgetMenuOperations: [
- * 		{ contents: [{ name: 'contextual-row-delete' }] }
- * 	]
+ *	columnsWidgetMenuOperations: [
+ *		{ contents: [{ name: 'columns-delete' }] }
+ *	],
+ *	rowsWidgetMenuOperations: [
+ *		{ contents: [{ name: 'rows-delete' }] }
+ *	]
+ *	});
  * });
  * ```
  *
@@ -96,14 +97,15 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  *                                              in columnBefore widget area are not rendered. {@link
  *                                              fonto-documentation/docs/generated-content/editor-api/index.xml#id-cd5577eb-9790-92d6-e3ac-8d1554fe6b12
  *                                              | All widgets} are supported.
- * @param options.columnWidgetMenuOperations  - To configure table widget menu for columns. It accepts
- *                                              an array of {@link ContextualOperation}s, but only
- *                                              supports "name" and "contents" properties. It is
- *                                              allowed to have only one layer of menu.
- * @param options.rowWidgetMenuOperations     - To configure table widget menu for rows. It accepts an
- *                                              array of {@link ContextualOperation}s, but only
- *                                              supports "name" and "contents" properties. It is
- *                                              allowed to have only one layer of menu.
+ * @param options.columnWidgetMenuOperations  - This is deprecated. Use columnsWidgetMenuOperations instead.
+ * @param options.columnsWidgetMenuOperations - To configure table widget menu for columns. It accepts an array of
+ *                                              {@link ContextualOperation}s, but only supports "name" and "contents" properties.
+ *                                              It is allowed to have only one layer of menu.
+ * @param options.rowWidgetMenuOperations     - This is deprecated. Use rowsWidgetMenuOperations instead.
+ * @param options.rowsWidgetMenuOperations    - To configure table widget menu for rows. It accepts an
+ *                                              array of {@link ContextualOperation}s, but only supports
+ *                                              "name" and "contents" properties. It is allowed to have
+ *                                              only one layer of menu.
  * @param options.table                       - Options for the table element.
  * @param options.table.namespaceURI          - The namespace URI for this table.
  * @param options.row                         - Configuration options for the row element.
@@ -155,8 +157,18 @@ export default function configureAsTeiTableElements(
 		showSelectionWidget?: boolean;
 		rowBefore?: Widget[] | WidgetSubAreaByName | null;
 		columnBefore?: Widget[] | WidgetSubAreaByName | null;
+		/**
+		 * @deprecated
+		 * Instead use columnsWidgetMenuOperations.
+		 */
 		columnWidgetMenuOperations?: ContextualOperation[] | null;
+		columnsWidgetMenuOperations?: ContextualOperation[] | null;
+		/**
+		 * @deprecated
+		 * Instead use rowsWidgetMenuOperations.
+		 */
 		rowWidgetMenuOperations?: ContextualOperation[] | null;
+		rowsWidgetMenuOperations?: ContextualOperation[] | null;
 		table?: {
 			namespaceURI?: string | null;
 		};
