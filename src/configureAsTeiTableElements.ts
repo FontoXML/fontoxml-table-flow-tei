@@ -1,13 +1,9 @@
-import type {
-	AllowExpansionInContentView,
-	DefaultTextContainer,
-	Widget,
-	WidgetSubAreaByName,
-} from 'fontoxml-families/src/types';
 import type { SxModule } from 'fontoxml-modular-schema-experience/src/sxManager';
-import type { ContextualOperation } from 'fontoxml-operations/src/types';
-import type { XPathQuery } from 'fontoxml-selectors/src/types';
 import configureAsTableElements from 'fontoxml-table-flow/src/configureAsTableElements';
+import type {
+	TableElementsSharedOptions,
+	TableElementsTeiOptions,
+} from 'fontoxml-table-flow/src/types.configureAsTableElements';
 
 import TeiTableDefinition from './table-definition/TeiTableDefinition';
 
@@ -146,57 +142,7 @@ import TeiTableDefinition from './table-definition/TeiTableDefinition';
  */
 export default function configureAsTeiTableElements(
 	sxModule: SxModule,
-	options?: {
-		priority?: number;
-		allowExpansionInContentView?: AllowExpansionInContentView;
-		showInsertionWidget?: boolean;
-		/**
-		 * @deprecated Instead use showSelectionWidget.
-		 */
-		showHighlightingWidget?: boolean;
-		showSelectionWidget?: boolean;
-		rowBefore?: Widget[] | WidgetSubAreaByName | null;
-		columnBefore?: Widget[] | WidgetSubAreaByName | null;
-		/**
-		 * @deprecated
-		 * Instead use columnsWidgetMenuOperations.
-		 */
-		columnWidgetMenuOperations?: ContextualOperation[] | null;
-		columnsWidgetMenuOperations?: ContextualOperation[] | null;
-		/**
-		 * @deprecated
-		 * Instead use rowsWidgetMenuOperations.
-		 */
-		rowWidgetMenuOperations?: ContextualOperation[] | null;
-		rowsWidgetMenuOperations?: ContextualOperation[] | null;
-		table?: {
-			namespaceURI?: string | null;
-		};
-		row?: {
-			headerAttribute?: {
-				name?: string;
-				value?: string;
-			};
-			regularAttribute?: {
-				name?: string;
-				value?: string;
-			};
-		};
-		cell?: {
-			defaultTextContainer?: DefaultTextContainer;
-			headerAttribute?: {
-				name?: string;
-				value?: string;
-			};
-			regularAttribute?: {
-				name?: string;
-				value?: string;
-			};
-		};
-		useDefaultContextMenu?: boolean;
-		isCollapsibleQuery?: XPathQuery;
-		isInitiallyCollapsedQuery?: XPathQuery;
-	}
+	options?: TableElementsSharedOptions & TableElementsTeiOptions
 ): void {
 	options = options || {};
 	const tableDefinition = new TeiTableDefinition(options);
