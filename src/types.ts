@@ -1,4 +1,4 @@
-import type { DefaultTextContainer } from 'fontoxml-families/src/types';
+import type { DefaultTextContainerConfiguration } from 'fontoxml-base-flow/src/types';
 
 /**
  * @remarks
@@ -91,7 +91,11 @@ export type TableElementsTeiOptions = {
 		 *
 		 * @fontosdk
 		 */
-		defaultTextContainer?: DefaultTextContainer;
+		defaultTextContainer?:
+			| DefaultTextContainerConfiguration
+			| string
+			| null
+			| undefined;
 		/**
 		 * @remarks
 		 * Configuration options for an attribute to be set on a
