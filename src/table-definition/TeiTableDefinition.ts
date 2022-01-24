@@ -1,8 +1,22 @@
+import xq from 'fontoxml-selectors/src/xq';
 import createCreateCellNodeStrategy from 'fontoxml-table-flow/src/createCreateCellNodeStrategy';
 import createCreateRowStrategy from 'fontoxml-table-flow/src/createCreateRowStrategy';
-import setAttributeStrategies from 'fontoxml-table-flow/src/setAttributeStrategies';
+import {
+	createColumnCountAsAttributeStrategy,
+	createColumnSpanAsAttributeStrategy,
+	createHeaderDefinitionAsAttributeStrategy,
+	createNormalDefinitionAsAttributeStrategy,
+	createRowCountAsAttributeStrategy,
+	createRowSpanAsAttributeStrategy,
+} from 'fontoxml-table-flow/src/setAttributeStrategies';
 import TableDefinition from 'fontoxml-table-flow/src/TableDefinition';
-import type { TeiTableOptions } from 'fontoxml-typescript-migration-debt/src/types';
+import type {
+	TableDefinitionProperties,
+	TableElementsSharedOptions,
+	TablePartSelectors,
+} from 'fontoxml-table-flow/src/types';
+
+import type { TableElementsTeiOptions } from '../types';
 
 /**
  * @remarks
@@ -12,7 +26,9 @@ class TeiTableDefinition extends TableDefinition {
 	/**
 	 * @param options -
 	 */
-	constructor(options: TeiTableOptions) {
+	public constructor(
+		options: TableElementsSharedOptions & TableElementsTeiOptions
+	) {
 		const namespaceURI =
 			options.table && options.table.namespaceURI
 				? options.table.namespaceURI
@@ -54,81 +70,76 @@ class TeiTableDefinition extends TableDefinition {
 			? options.cell.regularAttribute.value
 			: '';
 
-		const namespaceSelector = `Q{${namespaceURI}}`;
-		const selectorParts = {
-			table: `${namespaceSelector}table${
-				options.table && options.table.tableFilterSelector
-					? `[${options.table.tableFilterSelector}]`
-					: ''
-			}`,
-			row: `${namespaceSelector}row`,
-			cell: `${namespaceSelector}cell`,
+		const tablePartSelectors: TablePartSelectors = {
+			table: xq(`self::Q{${namespaceURI}}table`),
+			row: xq(`self::Q{${namespaceURI}}row`),
+			cell: xq(`self::Q{${namespaceURI}}cell`),
 		};
 
-		let headerRowFilter = '';
-		let bodyRowFilter = '';
+		let headerRowFilter = xq`true()`;
+		let bodyRowFilter = xq`true()`;
 
 		if (shouldSetAttributeForHeaderRows) {
-			headerRowFilter += `[@${headerRowAttributeName}="${headerRowAttributeValue}"`;
-			bodyRowFilter += `[(@${headerRowAttributeName}="${headerRowAttributeValue}") => not()`;
+			headerRowFilter = xq`@*[name(.)=${headerRowAttributeName}]=${headerRowAttributeValue}`;
+			bodyRowFilter = xq`(@*[name(.)=${headerRowAttributeName}]="${headerRowAttributeValue}") => not()`;
 		}
 
 		if (shouldSetAttributeForHeaderCells) {
-			headerRowFilter += `${
-				headerRowFilter !== '' ? ' or ' : '['
-			}child::${
-				selectorParts.cell
-			}/@${headerCellAttributeName}="${headerCellAttributeValue}"`;
-			bodyRowFilter += `${bodyRowFilter !== '' ? ' or ' : '['}(child::${
-				selectorParts.cell
-			}/@${headerCellAttributeName}="${headerCellAttributeValue}") => not()`;
-		}
+			headerRowFilter = xq`${
+				shouldSetAttributeForHeaderRows ? headerRowFilter : xq`false()`
+			} or child::*[${
+				tablePartSelectors.cell
+			}]/@*[name(.)=${headerCellAttributeName}]=${headerCellAttributeValue}`;
 
-		if (
-			shouldSetAttributeForHeaderRows ||
-			shouldSetAttributeForHeaderCells
-		) {
-			headerRowFilter += ']';
-			bodyRowFilter += ']';
+			bodyRowFilter = xq`${
+				shouldSetAttributeForHeaderRows ? headerRowFilter : xq`false()`
+			} or (child::*[${
+				tablePartSelectors.cell
+			}]/@*[name(.)=${headerCellAttributeName}]=${headerCellAttributeValue}) => not()`;
 		}
 
 		// Alias selector parts
-		const row = selectorParts.row;
-		const cell = selectorParts.cell;
+		const row = tablePartSelectors.row;
+		const cell = tablePartSelectors.cell;
 
 		// Properties object
-		const properties = {
-			selectorParts,
+		const properties: TableDefinitionProperties = {
+			tablePartSelectors,
 
 			// Header row node selector
 			headerRowNodeSelector:
 				shouldSetAttributeForHeaderRows ||
 				shouldSetAttributeForHeaderCells
-					? `self::${row + headerRowFilter}`
+					? xq`${row}[${headerRowFilter}]`
 					: undefined,
 
 			// Finds
 			findHeaderRowNodesXPathQuery:
 				shouldSetAttributeForHeaderRows ||
 				shouldSetAttributeForHeaderCells
-					? `./${row}${headerRowFilter}`
-					: '()',
-			findBodyRowNodesXPathQuery: `./${row}${bodyRowFilter}`,
+					? xq`child::*[${row}[${headerRowFilter}]]`
+					: xq`()`,
+			findBodyRowNodesXPathQuery: xq`child::*[${row}[${bodyRowFilter}]]`,
 
-			findCellNodesXPathQuery: `./${cell}`,
+			findCellNodesXPathQuery: xq`child::*[${cell}]`,
 
-			findNonTableNodesPrecedingRowsXPathQuery: `./*[self::${row} => not() and following-sibling::${row}]`,
-			findNonTableNodesFollowingRowsXPathQuery: `./*[self::${row} => not() and preceding-sibling::${row}]`,
+			findNonTableNodesPrecedingRowsXPathQuery: xq`child::*[${row} => not() and following-sibling::*[${row}]]`,
+			findNonTableNodesFollowingRowsXPathQuery: xq`child::*[${row} => not() and preceding-sibling::*[${row}]]`,
 
 			// Data
-			getNumberOfColumnsXPathQuery: `${
-				'let $cols := ./@cols => number() return if ($cols) then $cols else ' +
-				'(let $cells := (.//'
-			}${row})[1]/${cell} return for $node in $cells return let $cols := $node/@cols => number() return if ($cols) then $cols else 1) => sum()`,
-			getRowSpanForCellNodeXPathQuery:
-				'let $rows := ./@rows => number() return if ($rows) then $rows else 1',
-			getColumnSpanForCellNodeXPathQuery:
-				'let $cols := ./@cols => number() return if ($cols) then $cols else 1',
+			getNumberOfColumnsXPathQuery: xq`let $cols := ./@cols => number()
+			return if ($cols)
+				then $cols
+				else (
+					let $cells := descendant::*[${row}][1]/child::*[${cell}]
+						return for $node in $cells
+							return let $cols := $node/@cols => number()
+								return if ($cols)
+									then $cols
+									else 1
+				) => sum()`,
+			getRowSpanForCellNodeXPathQuery: xq`let $rows := ./@rows => number() return if ($rows) then $rows else 1`,
+			getColumnSpanForCellNodeXPathQuery: xq`let $cols := ./@cols => number() return if ($cols) then $cols else 1`,
 
 			// Creates
 			createCellNodeStrategy: createCreateCellNodeStrategy(
@@ -139,21 +150,15 @@ class TeiTableDefinition extends TableDefinition {
 
 			// Set attributes
 			setTableNodeAttributeStrategies: [
-				setAttributeStrategies.createColumnCountAsAttributeStrategy(
-					'cols'
-				),
-				setAttributeStrategies.createRowCountAsAttributeStrategy(
-					'rows'
-				),
+				createColumnCountAsAttributeStrategy('cols'),
+				createRowCountAsAttributeStrategy('rows'),
 			],
 
 			setRowNodeAttributeStrategies: [],
 
 			setCellNodeAttributeStrategies: [
-				setAttributeStrategies.createColumnSpanAsAttributeStrategy(
-					'cols'
-				),
-				setAttributeStrategies.createRowSpanAsAttributeStrategy('rows'),
+				createColumnSpanAsAttributeStrategy('cols'),
+				createRowSpanAsAttributeStrategy('rows'),
 			],
 
 			// Deprecated
@@ -172,7 +177,7 @@ class TeiTableDefinition extends TableDefinition {
 
 		if (shouldSetAttributeForHeaderRows) {
 			properties.setRowNodeAttributeStrategies.push(
-				setAttributeStrategies.createHeaderDefinitionAsAttributeStrategy(
+				createHeaderDefinitionAsAttributeStrategy(
 					headerRowAttributeName,
 					headerRowAttributeValue
 				)
@@ -181,7 +186,7 @@ class TeiTableDefinition extends TableDefinition {
 
 		if (shouldSetAttributeForNormalRows) {
 			properties.setRowNodeAttributeStrategies.push(
-				setAttributeStrategies.createNormalDefinitionAsAttributeStrategy(
+				createNormalDefinitionAsAttributeStrategy(
 					normalRowAttributeName,
 					normalRowAttributeValue
 				)
@@ -190,7 +195,7 @@ class TeiTableDefinition extends TableDefinition {
 
 		if (shouldSetAttributeForHeaderCells) {
 			properties.setCellNodeAttributeStrategies.push(
-				setAttributeStrategies.createHeaderDefinitionAsAttributeStrategy(
+				createHeaderDefinitionAsAttributeStrategy(
 					headerCellAttributeName,
 					headerCellAttributeValue
 				)
@@ -199,7 +204,7 @@ class TeiTableDefinition extends TableDefinition {
 
 		if (shouldSetAttributeForNormalCells) {
 			properties.setCellNodeAttributeStrategies.push(
-				setAttributeStrategies.createNormalDefinitionAsAttributeStrategy(
+				createNormalDefinitionAsAttributeStrategy(
 					normalCellAttributeName,
 					normalCellAttributeValue
 				)
