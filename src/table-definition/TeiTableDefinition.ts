@@ -1,4 +1,4 @@
-import xq from 'fontoxml-selectors/src/xq';
+import xq, { ensureXQExpression } from 'fontoxml-selectors/src/xq';
 import createCreateCellNodeStrategy from 'fontoxml-table-flow/src/createCreateCellNodeStrategy';
 import createCreateRowStrategy from 'fontoxml-table-flow/src/createCreateRowStrategy';
 import {
@@ -71,9 +71,9 @@ class TeiTableDefinition extends TableDefinition {
 			: '';
 
 		const tablePartSelectors: TablePartSelectors = {
-			table: xq(`self::Q{${namespaceURI}}table`),
-			row: xq(`self::Q{${namespaceURI}}row`),
-			cell: xq(`self::Q{${namespaceURI}}cell`),
+			table: ensureXQExpression(`self::Q{${namespaceURI}}table`),
+			row: ensureXQExpression(`self::Q{${namespaceURI}}row`),
+			cell: ensureXQExpression(`self::Q{${namespaceURI}}cell`),
 		};
 
 		let headerRowFilter = xq`true()`;
