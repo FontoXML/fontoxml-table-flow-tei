@@ -79,9 +79,13 @@ class TeiTableDefinition extends TableDefinition {
 		let headerRowFilter = xq`true()`;
 		let bodyRowFilter = xq`true()`;
 
+		const headerRowAttributeQuery = headerRowAttributeName
+			? ensureXQExpression(`attribute::*:${headerRowAttributeName}`)
+			: xq`()`;
+
 		if (shouldSetAttributeForHeaderRows) {
-			headerRowFilter = xq`@*[name(.)=${headerRowAttributeName}]=${headerRowAttributeValue}`;
-			bodyRowFilter = xq`(@*[name(.)=${headerRowAttributeName}]="${headerRowAttributeValue}") => not()`;
+			headerRowFilter = xq`${headerRowAttributeQuery}=${headerRowAttributeValue}`;
+			bodyRowFilter = xq`(${headerRowAttributeQuery}=${headerRowAttributeValue}) => not()`;
 		}
 
 		if (shouldSetAttributeForHeaderCells) {
