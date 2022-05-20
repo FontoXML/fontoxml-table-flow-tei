@@ -23,9 +23,6 @@ import type { TableElementsTeiOptions } from '../types';
  * Configures the table definition for TEI tables.
  */
 class TeiTableDefinition extends TableDefinition {
-	/**
-	 * @param options -
-	 */
 	public constructor(
 		options: TableElementsSharedOptions & TableElementsTeiOptions
 	) {
