@@ -6,7 +6,7 @@ import type { DefaultTextContainerConfiguration } from 'fontoxml-base-flow/src/t
  * {@link TableElementsSharedOptions} for more information on the other
  * options accepted by this function.
  *
- * @fontosdk
+ * @fontosdk importable
  */
 export type TableElementsTeiOptions = {
 	/**
