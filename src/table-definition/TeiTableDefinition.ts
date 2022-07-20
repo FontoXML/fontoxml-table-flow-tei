@@ -162,10 +162,6 @@ class TeiTableDefinition extends TableDefinition {
 				createRowSpanAsAttributeStrategy('rows'),
 			],
 
-			// Deprecated
-			columnWidgetMenuOperations: options.columnWidgetMenuOperations,
-			rowWidgetMenuOperations: options.rowWidgetMenuOperations,
-			// Widget menu operations
 			// Widget menu operations
 			columnsWidgetMenuOperations:
 				options.columnsWidgetMenuOperations || [
