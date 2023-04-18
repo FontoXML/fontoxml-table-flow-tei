@@ -1,39 +1,41 @@
-import * as slimdom from 'slimdom';
-
-import Blueprint from 'fontoxml-blueprints/src/Blueprint';
-import CoreDocument from 'fontoxml-core/src/Document';
-import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
-import indicesManager from 'fontoxml-indices/src/indicesManager';
+import type {
+	FontoDocumentNode,
+	FontoElementNode,
+	JsonMl,
+} from 'fontoxml-dom-utils/src/types';
+import xq from 'fontoxml-selectors/src/xq';
+import type TableCell from 'fontoxml-table-flow/src/TableGridModel/TableCell';
+import type TableGridModel from 'fontoxml-table-flow/src/TableGridModel/TableGridModel';
 import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
-
-const stubFormat = {
-	synthesizer: {
-		completeStructure: () => true,
-	},
-	metadata: {
-		get: (_option, _node) => false,
-	},
-	validator: {
-		canContain: () => true,
-	},
-};
+import { assertDocumentAsJsonMl } from 'fontoxml-unit-test-utils/src/unitTestAssertionHelpers';
+import UnitTestEnvironment from 'fontoxml-unit-test-utils/src/UnitTestEnvironment';
+import {
+	findFirstNodeInDocument,
+	runWithBlueprint,
+} from 'fontoxml-unit-test-utils/src/unitTestSetupHelpers';
 
 describe('TEI: Grid model to XML', () => {
-	let blueprint;
-	let coreDocument;
-	let createTable;
-	let documentNode;
-	let tableDefinition;
-	let tableNode;
-
+	let environment: UnitTestEnvironment;
 	beforeEach(() => {
-		documentNode = new slimdom.Document();
-		coreDocument = new CoreDocument(documentNode);
-		blueprint = new Blueprint(coreDocument.dom);
+		environment = new UnitTestEnvironment();
+	});
+	afterEach(() => {
+		environment.destroy();
+	});
 
-		tableNode = documentNode.createElement('table');
-
-		tableDefinition = new TeiTableDefinition({
+	function runTest(
+		numberOfRows: number,
+		numberOfColumns: number,
+		hasHeader: boolean,
+		modifyGridModel: ((gridModel: TableGridModel) => void) | undefined,
+		expected: JsonMl
+	): void {
+		const documentId = environment.createDocumentFromJsonMl(['table']);
+		const documentNode = findFirstNodeInDocument(
+			documentId,
+			xq`self::node()`
+		) as FontoDocumentNode;
+		const tableDefinition = new TeiTableDefinition({
 			cell: {
 				headerAttribute: {
 					name: 'role',
@@ -41,129 +43,97 @@ describe('TEI: Grid model to XML', () => {
 				},
 			},
 		});
-		createTable = tableDefinition.getTableGridModelBuilder();
-
-		coreDocument.dom.mutate(() => {
-			documentNode.appendChild(tableNode);
+		const tableNode = findFirstNodeInDocument(
+			documentId,
+			xq`/table`
+		) as FontoElementNode;
+		runWithBlueprint((blueprint, _, format) => {
+			const tableGridModel = tableDefinition.getTableGridModelBuilder()(
+				numberOfRows,
+				numberOfColumns,
+				hasHeader,
+				documentNode
+			);
+			if (modifyGridModel) {
+				modifyGridModel(tableGridModel);
+			}
+			chai.assert.isTrue(
+				tableDefinition.applyToDom(
+					tableGridModel,
+					tableNode,
+					blueprint,
+					format
+				)
+			);
 		});
-	});
+		assertDocumentAsJsonMl(documentId, expected);
+	}
 
 	describe('Basics', () => {
 		it('can serialize a 1x1 table', () => {
-			const tableGridModel = createTable(1, 1, false, documentNode);
-			chai.assert.isTrue(
-				tableDefinition.applyToDom(
-					tableGridModel,
-					tableNode,
-					blueprint,
-					stubFormat
-				)
-			);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
-				[
-					'table',
-					{
-						cols: '1',
-						rows: '1',
-					},
-					['row', ['cell']],
-				]
-			);
+			runTest(1, 1, false, undefined, [
+				'table',
+				{
+					cols: '1',
+					rows: '1',
+				},
+				['row', ['cell']],
+			]);
 		});
 
 		it('can serialize a 4x4 table', () => {
-			const tableGridModel = createTable(4, 4, false, documentNode);
-			chai.assert.isTrue(
-				tableDefinition.applyToDom(
-					tableGridModel,
-					tableNode,
-					blueprint,
-					stubFormat
-				)
-			);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
-				[
-					'table',
-					{
-						cols: '4',
-						rows: '4',
-					},
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				]
-			);
+			runTest(4, 4, false, undefined, [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+			]);
 		});
 	});
 
 	describe('Headers', () => {
 		it('can serialize a 4x4 table', () => {
-			const tableGridModel = createTable(4, 4, true, documentNode);
-			chai.assert.isTrue(
-				tableDefinition.applyToDom(
-					tableGridModel,
-					tableNode,
-					blueprint,
-					stubFormat
-				)
-			);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
+			runTest(4, 4, true, undefined, [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
 				[
-					'table',
-					{
-						cols: '4',
-						rows: '4',
-					},
-					[
-						'row',
-						['cell', { role: 'label' }],
-						['cell', { role: 'label' }],
-						['cell', { role: 'label' }],
-						['cell', { role: 'label' }],
-					],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-					['row', ['cell'], ['cell'], ['cell'], ['cell']],
-				]
-			);
+					'row',
+					['cell', { role: 'label' }],
+					['cell', { role: 'label' }],
+					['cell', { role: 'label' }],
+					['cell', { role: 'label' }],
+				],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+			]);
 		});
 	});
 
 	describe('Spanning cells', () => {
 		it('can serialize a 4x4 table with 1 column spanning cell', () => {
-			const tableGridModel = createTable(4, 4, false, documentNode);
-			const spanningCell = tableGridModel.getCellAtCoordinates(1, 1);
-			spanningCell.size.columns = 2;
+			runTest(
+				4,
+				4,
+				false,
+				(tableGridModel) => {
+					const spanningCell = tableGridModel.getCellAtCoordinates(
+						1,
+						1
+					) as TableCell;
+					spanningCell.size.columns = 2;
 
-			tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
-			tableGridModel.setCellAtCoordinates(spanningCell, 1, 2);
-
-			chai.assert.isTrue(
-				tableDefinition.applyToDom(
-					tableGridModel,
-					tableNode,
-					blueprint,
-					stubFormat
-				)
-			);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
+					tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
+					tableGridModel.setCellAtCoordinates(spanningCell, 1, 2);
+				},
 				[
 					'table',
 					{
@@ -179,25 +149,20 @@ describe('TEI: Grid model to XML', () => {
 		});
 
 		it('can serialize a 4x4 table with 1 row spanning cell', () => {
-			const tableGridModel = createTable(4, 4, false, documentNode);
-			const spanningCell = tableGridModel.getCellAtCoordinates(1, 1);
-			spanningCell.size.rows = 2;
+			runTest(
+				4,
+				4,
+				false,
+				(tableGridModel) => {
+					const spanningCell = tableGridModel.getCellAtCoordinates(
+						1,
+						1
+					) as TableCell;
+					spanningCell.size.rows = 2;
 
-			tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
-			tableGridModel.setCellAtCoordinates(spanningCell, 2, 1);
-
-			const success = tableDefinition.applyToDom(
-				tableGridModel,
-				tableNode,
-				blueprint,
-				stubFormat
-			);
-			chai.assert.isTrue(success);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
+					tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
+					tableGridModel.setCellAtCoordinates(spanningCell, 2, 1);
+				},
 				[
 					'table',
 					{
@@ -219,29 +184,23 @@ describe('TEI: Grid model to XML', () => {
 		});
 
 		it('can serialize a 4x4 table with 1 column and row spanning cell', () => {
-			const tableGridModel = createTable(4, 4, false, documentNode);
+			runTest(
+				4,
+				4,
+				false,
+				(tableGridModel) => {
+					const spanningCell = tableGridModel.getCellAtCoordinates(
+						1,
+						1
+					) as TableCell;
+					spanningCell.size.columns = 2;
+					spanningCell.size.rows = 2;
 
-			const spanningCell = tableGridModel.getCellAtCoordinates(1, 1);
-			spanningCell.size.columns = 2;
-			spanningCell.size.rows = 2;
-
-			tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
-			tableGridModel.setCellAtCoordinates(spanningCell, 1, 2);
-			tableGridModel.setCellAtCoordinates(spanningCell, 2, 1);
-			tableGridModel.setCellAtCoordinates(spanningCell, 2, 2);
-
-			const success = tableDefinition.applyToDom(
-				tableGridModel,
-				tableNode,
-				blueprint,
-				stubFormat
-			);
-			chai.assert.isTrue(success);
-
-			blueprint.realize();
-			indicesManager.getIndexSet().commitMerge();
-			chai.assert.deepEqual(
-				jsonMLMapper.serialize(documentNode.firstChild),
+					tableGridModel.setCellAtCoordinates(spanningCell, 1, 1);
+					tableGridModel.setCellAtCoordinates(spanningCell, 1, 2);
+					tableGridModel.setCellAtCoordinates(spanningCell, 2, 1);
+					tableGridModel.setCellAtCoordinates(spanningCell, 2, 2);
+				},
 				[
 					'table',
 					{

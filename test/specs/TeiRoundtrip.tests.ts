@@ -1,12 +1,20 @@
-import * as slimdom from 'slimdom';
-
-import Blueprint from 'fontoxml-blueprints/src/Blueprint';
-import CoreDocument from 'fontoxml-core/src/Document';
-import jsonMLMapper from 'fontoxml-dom-utils/src/jsonMLMapper';
-import indicesManager from 'fontoxml-indices/src/indicesManager';
+import type Blueprint from 'fontoxml-blueprints/src/Blueprint';
+import type { FontoElementNode, JsonMl } from 'fontoxml-dom-utils/src/types';
+import xq from 'fontoxml-selectors/src/xq';
+import { isTableGridModel } from 'fontoxml-table-flow/src/indexedTableGridModels';
 import mergeCells from 'fontoxml-table-flow/src/TableGridModel/mutations/merging/mergeCells';
 import splitSpanningCell from 'fontoxml-table-flow/src/TableGridModel/mutations/splitting/splitSpanningCell';
+import type TableCell from 'fontoxml-table-flow/src/TableGridModel/TableCell';
+import type TableGridModel from 'fontoxml-table-flow/src/TableGridModel/TableGridModel';
+import type { TableElementsSharedOptions } from 'fontoxml-table-flow/src/types';
 import TeiTableDefinition from 'fontoxml-table-flow-tei/src/table-definition/TeiTableDefinition';
+import type { TableElementsTeiOptions } from 'fontoxml-table-flow-tei/src/types';
+import { assertDocumentAsJsonMl } from 'fontoxml-unit-test-utils/src/unitTestAssertionHelpers';
+import UnitTestEnvironment from 'fontoxml-unit-test-utils/src/UnitTestEnvironment';
+import {
+	findFirstNodeInDocument,
+	runWithBlueprint,
+} from 'fontoxml-unit-test-utils/src/unitTestSetupHelpers';
 
 const mergeCellWithCellToTheRight = mergeCells.mergeCellWithCellToTheRight;
 const mergeCellWithCellToTheLeft = mergeCells.mergeCellWithCellToTheLeft;
@@ -16,69 +24,58 @@ const mergeCellWithCellAbove = mergeCells.mergeCellWithCellAbove;
 const splitCellIntoRows = splitSpanningCell.splitCellIntoRows;
 const splitCellIntoColumns = splitSpanningCell.splitCellIntoColumns;
 
-const stubFormat = {
-	synthesizer: {
-		completeStructure: () => true,
-	},
-	metadata: {
-		get: (_option, _node) => false,
-	},
-	validator: {
-		canContain: () => true,
-		validateDown: () => [],
-	},
-};
-
 describe('TEI: XML to XML roundtrip', () => {
-	let documentNode;
-	let coreDocument;
-	let blueprint;
-
+	let environment: UnitTestEnvironment;
 	beforeEach(() => {
-		documentNode = new slimdom.Document();
-		coreDocument = new CoreDocument(documentNode);
-
-		blueprint = new Blueprint(coreDocument.dom);
+		environment = new UnitTestEnvironment();
+	});
+	afterEach(() => {
+		environment.destroy();
 	});
 
-	function transformTable(
-		jsonIn,
-		jsonOut,
-		options = {},
-		mutateGridModel = () => {}
-	) {
-		coreDocument.dom.mutate(() => jsonMLMapper.parse(jsonIn, documentNode));
-
+	function runTest(
+		jsonIn: JsonMl,
+		jsonOut: JsonMl,
+		options: TableElementsSharedOptions & TableElementsTeiOptions = {},
+		mutateGridModel: (
+			gridModel: TableGridModel,
+			blueprint: Blueprint
+		) => void = () => {
+			// Do nothing
+		}
+	): void {
+		const documentId = environment.createDocumentFromJsonMl(jsonIn);
 		const tableDefinition = new TeiTableDefinition(options);
-		const tableNode = documentNode.firstChild;
-		const gridModel = tableDefinition.buildTableGridModel(
-			tableNode,
-			blueprint
-		);
-		chai.assert.isUndefined(gridModel.error);
+		const tableNode = findFirstNodeInDocument(
+			documentId,
+			xq`//table`
+		) as FontoElementNode;
+		runWithBlueprint((blueprint, _, format) => {
+			const gridModel = tableDefinition.buildTableGridModel(
+				tableNode,
+				blueprint
+			);
+			if (!isTableGridModel(gridModel)) {
+				throw gridModel.error;
+			}
 
-		mutateGridModel(gridModel);
+			mutateGridModel(gridModel, blueprint);
 
-		const success = tableDefinition.applyToDom(
-			gridModel,
-			tableNode,
-			blueprint,
-			stubFormat
-		);
-		chai.assert.isTrue(success);
+			const success = tableDefinition.applyToDom(
+				gridModel,
+				tableNode,
+				blueprint,
+				format
+			);
+			chai.assert.isTrue(success);
+		});
 
-		blueprint.realize();
-		// The changes will be set to merge with the base index, this needs to be commited.
-		indicesManager.getIndexSet().commitMerge();
-		chai.assert.deepEqual(
-			jsonMLMapper.serialize(documentNode.firstChild),
-			jsonOut
-		);
+		assertDocumentAsJsonMl(documentId, jsonOut);
 	}
 
 	describe('Without changes', () => {
 		it('can handle a 1x1 table, changing nothing', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '1',
@@ -87,7 +84,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell']],
 			];
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '1',
@@ -98,11 +95,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options);
+			runTest(jsonIn, jsonOut, options);
 		});
 
 		it('can handle a 4x4 table, changing nothing', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -114,7 +111,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -128,13 +125,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options);
+			runTest(jsonIn, jsonOut, options);
 		});
 	});
 
 	describe('Header rows', () => {
 		it('can handle a 4x4 table, increasing the header row count by 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -149,7 +146,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.increaseHeaderRowCount(1);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -176,11 +173,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, increasing the header row count by 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -201,7 +198,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.increaseHeaderRowCount(1);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -234,11 +231,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 2 header rows, decreasing the header row count by 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -265,7 +262,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.decreaseHeaderRowCount();
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -292,11 +289,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, decreasing the header row count by 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -317,7 +314,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.decreaseHeaderRowCount();
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -338,11 +335,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, increasing the header row count by 1, setting all role attributes', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -357,7 +354,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.increaseHeaderRowCount(1);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -420,13 +417,13 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Insert row', () => {
 		it('can handle a 4x4 table, inserting a row before index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -441,7 +438,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertRow(0, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -456,11 +453,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, inserting a row before index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -475,7 +472,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertRow(2, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -490,11 +487,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, inserting a row after index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -508,7 +505,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.insertRow(3, true);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -523,11 +520,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, inserting a row before index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -548,7 +545,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertRow(0, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -575,11 +572,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 2 header rows, inserting a row after index 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -605,7 +602,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.insertRow(1, true);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -638,13 +635,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Delete row', () => {
 		it('can handle a 4x4 table, deleting a row at index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -658,7 +655,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -671,11 +668,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, deleting a row at index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -689,7 +686,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(2);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -702,11 +699,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, deleting a row at index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -720,7 +717,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(3);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -733,11 +730,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, deleting a row at index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -757,7 +754,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -770,11 +767,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, deleting a row at index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -800,7 +797,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(0);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -819,11 +816,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 2 header rows, deleting a row at index 1', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -849,7 +846,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteRow(1);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -868,13 +865,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Insert column', () => {
 		it('can handle a 4x4 table, adding 1 column before index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -889,7 +886,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(0, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -903,11 +900,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, adding 1 column before index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -922,7 +919,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(2, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -936,11 +933,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, adding 1 column after index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -955,7 +952,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(3, true);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -969,11 +966,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, adding 1 column before index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -994,7 +991,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(0, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -1015,11 +1012,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, adding 1 column before index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1040,7 +1037,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(2, false);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -1061,11 +1058,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, adding 1 column after index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1086,7 +1083,7 @@ describe('TEI: XML to XML roundtrip', () => {
 			const mutateGridModel = (gridModel) =>
 				gridModel.insertColumn(3, true);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '5',
@@ -1107,13 +1104,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Delete column', () => {
 		it('can handle a 4x4 table, deleting 1 column at index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1127,7 +1124,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(0);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1141,11 +1138,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, deleting 1 column at index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1159,7 +1156,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(2);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1173,11 +1170,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table, deleting 1 column at index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1191,7 +1188,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(3);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1205,11 +1202,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, deleting 1 column at index 0', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1229,7 +1226,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(0);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1248,11 +1245,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, deleting 1 column at index 2', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1272,7 +1269,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(2);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1291,11 +1288,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 4x4 table with 1 header row, deleting 1 column at index 3', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1315,7 +1312,7 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const mutateGridModel = (gridModel) => gridModel.deleteColumn(3);
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1334,13 +1331,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Merging cells', () => {
 		it('can handle a 3x3 table, merging a cell with the cell above', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1351,14 +1348,18 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (
+				gridModel: TableGridModel,
+				blueprint: Blueprint
+			) => {
 				mergeCellWithCellAbove(
 					gridModel,
-					gridModel.getCellAtCoordinates(1, 1),
+					gridModel.getCellAtCoordinates(1, 1) as TableCell,
 					blueprint
 				);
+			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1371,11 +1372,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 3x3 table, merging a cell with the cell to the right', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1386,14 +1387,18 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (
+				gridModel: TableGridModel,
+				blueprint: Blueprint
+			) => {
 				mergeCellWithCellToTheRight(
 					gridModel,
-					gridModel.getCellAtCoordinates(1, 1),
+					gridModel.getCellAtCoordinates(1, 1) as TableCell,
 					blueprint
 				);
+			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1406,11 +1411,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 3x3 table, merging a cell with the cell below', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1421,14 +1426,18 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (
+				gridModel: TableGridModel,
+				blueprint: Blueprint
+			) => {
 				mergeCellWithCellBelow(
 					gridModel,
-					gridModel.getCellAtCoordinates(1, 1),
+					gridModel.getCellAtCoordinates(1, 1) as TableCell,
 					blueprint
 				);
+			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1441,11 +1450,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 3x3 table, merging a cell with a cell to the left', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1456,14 +1465,18 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell']],
 			];
 
-			const mutateGridModel = (gridModel) =>
+			const mutateGridModel = (
+				gridModel: TableGridModel,
+				blueprint: Blueprint
+			) => {
 				mergeCellWithCellToTheLeft(
 					gridModel,
-					gridModel.getCellAtCoordinates(1, 1),
+					gridModel.getCellAtCoordinates(1, 1) as TableCell,
 					blueprint
 				);
+			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1476,13 +1489,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('Split cell', () => {
 		it('can handle a 3x3 table, splitting a cell spanning over columns', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1500,7 +1513,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				);
 			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1513,11 +1526,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
 		it('can handle a 3x3 table, splitting a cell spanning over rows', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1535,7 +1548,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				);
 			};
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '3',
@@ -1548,13 +1561,13 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options, mutateGridModel);
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 	});
 
 	describe('TEI specifics', () => {
 		it('can handle a 4x4 table without rows and cols attributes', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
@@ -1562,7 +1575,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1576,11 +1589,11 @@ describe('TEI: XML to XML roundtrip', () => {
 
 			const options = {};
 
-			transformTable(jsonIn, jsonOut, options);
+			runTest(jsonIn, jsonOut, options);
 		});
 
 		it('can handle a 4x4 table without role="data"', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
@@ -1588,7 +1601,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1633,11 +1646,11 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options);
+			runTest(jsonIn, jsonOut, options);
 		});
 
 		it('can handle a 4x4 table, without @role="data" on the rows', () => {
-			const jsonIn = [
+			const jsonIn: JsonMl = [
 				'table',
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
@@ -1645,7 +1658,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				['row', ['cell'], ['cell'], ['cell'], ['cell']],
 			];
 
-			const jsonOut = [
+			const jsonOut: JsonMl = [
 				'table',
 				{
 					cols: '4',
@@ -1694,7 +1707,7 @@ describe('TEI: XML to XML roundtrip', () => {
 				},
 			};
 
-			transformTable(jsonIn, jsonOut, options);
+			runTest(jsonIn, jsonOut, options);
 		});
 	});
 });
