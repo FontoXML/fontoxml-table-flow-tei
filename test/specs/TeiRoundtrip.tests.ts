@@ -523,6 +523,156 @@ describe('TEI: XML to XML roundtrip', () => {
 			runTest(jsonIn, jsonOut, options, mutateGridModel);
 		});
 
+		it('can handle a 4x4 table with header and trailer, inserting a row before index 0', () => {
+			const jsonIn: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertRow(0, false);
+
+			const jsonOut: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '5',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const options = {};
+
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
+		});
+
+		it('can handle a 4x4 table with header and trailer, inserting a row before index 2', () => {
+			const jsonIn: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const mutateGridModel = (gridModel) =>
+				gridModel.insertRow(2, false);
+
+			const jsonOut: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '5',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const options = {};
+
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
+		});
+
+		it('can handle a 4x4 table with header and trailer, inserting a row after index 3', () => {
+			const jsonIn: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const mutateGridModel = (gridModel) => gridModel.insertRow(3, true);
+
+			const jsonOut: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '5',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const options = {};
+
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
+		});
+
+		it('can handle a 4x4 table with header and trailer, inserting a row after index 4', () => {
+			const jsonIn: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '4',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const mutateGridModel = (gridModel) => gridModel.insertRow(4, true);
+
+			const jsonOut: JsonMl = [
+				'table',
+				{
+					cols: '4',
+					rows: '5',
+				},
+				['head'],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['row', ['cell'], ['cell'], ['cell'], ['cell']],
+				['trailer'],
+			];
+
+			const options = {};
+
+			runTest(jsonIn, jsonOut, options, mutateGridModel);
+		});
+
 		it('can handle a 4x4 table with 1 header row, inserting a row before index 0', () => {
 			const jsonIn: JsonMl = [
 				'table',
