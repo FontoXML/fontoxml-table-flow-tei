@@ -26,13 +26,11 @@ class TeiTableDefinition extends TableDefinition {
 	public constructor(
 		options: TableElementsSharedOptions & TableElementsTeiOptions
 	) {
-		const namespaceURI =
-			options.table && options.table.namespaceURI
-				? options.table.namespaceURI
-				: '';
+		const namespaceURI = options.table?.namespaceURI
+			? options.table.namespaceURI
+			: '';
 
-		const shouldSetAttributeForHeaderRows =
-			options.row && options.row.headerAttribute;
+		const shouldSetAttributeForHeaderRows = options.row?.headerAttribute;
 		const headerRowAttributeName = shouldSetAttributeForHeaderRows
 			? options.row.headerAttribute.name
 			: '';
@@ -40,8 +38,7 @@ class TeiTableDefinition extends TableDefinition {
 			? options.row.headerAttribute.value
 			: '';
 
-		const shouldSetAttributeForNormalRows =
-			options.row && options.row.regularAttribute;
+		const shouldSetAttributeForNormalRows = options.row?.regularAttribute;
 		const normalRowAttributeName = shouldSetAttributeForNormalRows
 			? options.row.regularAttribute.name
 			: '';
@@ -49,8 +46,7 @@ class TeiTableDefinition extends TableDefinition {
 			? options.row.regularAttribute.value
 			: '';
 
-		const shouldSetAttributeForHeaderCells =
-			options.cell && options.cell.headerAttribute;
+		const shouldSetAttributeForHeaderCells = options.cell?.headerAttribute;
 		const headerCellAttributeName = shouldSetAttributeForHeaderCells
 			? options.cell.headerAttribute.name
 			: '';
@@ -58,8 +54,7 @@ class TeiTableDefinition extends TableDefinition {
 			? options.cell.headerAttribute.value
 			: '';
 
-		const shouldSetAttributeForNormalCells =
-			options.cell && options.cell.regularAttribute;
+		const shouldSetAttributeForNormalCells = options.cell?.regularAttribute;
 		const normalCellAttributeName = shouldSetAttributeForNormalCells
 			? options.cell.regularAttribute.name
 			: '';
